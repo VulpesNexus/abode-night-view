@@ -1,0 +1,42 @@
+# =============================================================================
+#  Abode Night View - what does not belong in the repository
+# -----------------------------------------------------------------------------
+#  Two rules, and everything here follows from one of them:
+#
+#    1. Anything build.ps1 can produce from what IS tracked. The .ico files are
+#       generated from the PNGs beside them by tools\make-icon.ps1, so they are
+#       derived artwork, not artwork.
+#    2. Anything a RUN produces. The settings file, the reports, the verifier's
+#       baseline: all of it describes the machine it was made on.
+#
+#  A clean checkout plus .\build.ps1 reproduces every ignored file except the
+#  reports, which need an Adobe application in front of them.
+# =============================================================================
+
+# --- built binaries ----------------------------------------------------------
+*.exe
+*.exe.old
+*.pdb
+dist/
+
+# --- generated artwork -------------------------------------------------------
+# assets\*.png are the sources and are tracked; the .ico containers are built
+# from them at build time and are 230 KB of the same pixels again.
+assets/*.ico
+
+# --- what a run leaves behind ------------------------------------------------
+AbodeNightView.ini
+NightView.ini
+AbodeNightView-diagnostics.txt
+AbodeNightView-probe.txt
+AbodeNightView-verify.txt
+audit-report.txt
+audit-*.png
+
+# --- editors and the shell ---------------------------------------------------
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+desktop.ini

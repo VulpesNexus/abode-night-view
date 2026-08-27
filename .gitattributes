@@ -1,0 +1,28 @@
+# =============================================================================
+#  Abode Night View - line endings and diffs
+# -----------------------------------------------------------------------------
+#  Everything text is LF in the repository AND LF in the working tree. Not
+#  "text=auto" alone: this project is built by csc.exe and by PowerShell, both
+#  of which read LF perfectly well, and a checkout that rewrites every line
+#  ending makes the first diff on a new machine the whole tree.
+#
+#  The .ps1 scripts are deliberately pure ASCII with no byte-order mark --
+#  PowerShell 5.1 reads a BOM-less file in the machine's ANSI codepage, so a
+#  non-ASCII character in one of them means something different on every
+#  machine. The .cs sources are UTF-8 without a BOM and DO contain en dashes,
+#  which is why build.ps1 passes csc -codepage:65001.
+# =============================================================================
+
+* text=auto eol=lf
+
+*.cs    text eol=lf diff=csharp
+*.ps1   text eol=lf
+*.cmd   text eol=lf
+*.jsx   text eol=lf
+*.md    text eol=lf
+LICENSE text eol=lf
+
+*.png   binary
+*.ico   binary
+*.exe   binary
+*.zip   binary
