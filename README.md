@@ -14,7 +14,7 @@ the menus, the toolbar, and everything else on your desktop are untouched.
 windows. It does not open, script, message, hook, or inject into any Adobe
 application, and nothing it does can reach a saved file or an export.
 
-    AbodeNightView.exe          start it; a moon appears in the tray
+    AbodeNightView.exe          start it; a certain fish appears in the tray
     tray → Enabled              on / off
     tray → Schedule             on and off by the clock, on a range you set
 
