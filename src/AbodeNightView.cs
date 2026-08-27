@@ -295,6 +295,13 @@ internal sealed class AbodeNvContext : ApplicationContext
     private uint _pinnedPid;
     private bool _captureAffinityFailed;
     private int _liveOverlays;
+
+    // What the hover text was last built from. The tooltip used to be refreshed
+    // only on user actions, so opening a document in an already-running product
+    // left it reading "no target" until the next click. These two are the cheap
+    // test for "the answer may have changed"; the survey behind the text is only
+    // run when one of them moves.
+    private int _tipLive = -1, _tipDetected = -1;
     private int _rebuiltSlots;
 
     /// <summary>
@@ -644,7 +651,7 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// </summary>
     private void Sync(bool rediscover)
     {
-        if (!_enabled) { ReleaseAll(); return; }
+        if (!_enabled) { ReleaseAll(); RefreshTrayIfChanged(); return; }
 
         if (rediscover) Rediscover();
 
@@ -717,6 +724,21 @@ internal sealed class AbodeNvContext : ApplicationContext
         }
 
         Assign(wanted, wantedVp);
+        RefreshTrayIfChanged();
+    }
+
+    /// <summary>
+    /// Rebuild the hover text when, and only when, the thing it describes has
+    /// moved: the number of overlays on screen, or the number of frames found.
+    /// Between those the answer cannot have changed, and the survey behind the
+    /// text is not free.
+    /// </summary>
+    private void RefreshTrayIfChanged()
+    {
+        int detected = _detected == null ? 0 : _detected.Count;
+        if (_liveOverlays == _tipLive && detected == _tipDetected) return;
+        _tipLive = _liveOverlays; _tipDetected = detected;
+        UpdateTrayText();
     }
 
     /// <summary>One EnumWindows pass; adds and removes frames, and re-arms hooks.</summary>
@@ -1589,9 +1611,42 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// </summary>
     private void UpdateTrayText()
     {
-        // Same function the harness asserts against, and the same state the
-        // menu reads, so the hover text and the menu cannot disagree.
-        _tray.Text = TrayState.Tooltip(_enabled, _strength, _liveOverlays);
+        int running, noDoc, unsupported;
+        SurveySelected(out running, out noDoc, out unsupported);
+        _tray.Text = TrayState.Tooltip(_enabled, _strength, _liveOverlays,
+                                       running, noDoc, unsupported);
+    }
+
+    /// <summary>
+    /// What the products the user has ticked are actually doing, counted from
+    /// the same <see cref="TargetRegistry.Survey"/> the Targets menu is built
+    /// from. This is the fix for the hover text and the menu contradicting each
+    /// other: there is now one survey and two renderings of it, rather than two
+    /// separate ideas of what "a target" means.
+    ///
+    /// Survey is handed the frames discovery already found, so the common case
+    /// costs nothing extra; it only goes back to the desktop for products it
+    /// was given no frame for. This runs on user actions and on a change in what
+    /// is attached, not on the timer, so the cost is paid when something has
+    /// actually happened.
+    /// </summary>
+    private void SurveySelected(out int running, out int noDocument, out int unsupported)
+    {
+        running = noDocument = unsupported = 0;
+
+        var selected = new List<AdobeTarget>();
+        foreach (var t in _adapters) if (ProductOn(t)) selected.Add(t);
+        if (selected.Count == 0) return;
+
+        var status = TargetRegistry.Survey(selected, _detected);
+        foreach (var t in selected)
+        {
+            TargetStatus st;
+            if (!status.TryGetValue(t.Id, out st) || st == TargetStatus.NotRunning) continue;
+            running++;
+            if (st == TargetStatus.NoDocument) noDocument++;
+            else if (st == TargetStatus.Unsupported) unsupported++;
+        }
     }
 
     /// <summary>
@@ -2095,21 +2150,25 @@ internal sealed class StrengthDialog : Form
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterScreen;
         MinimizeBox = false; MaximizeBox = false; ShowInTaskbar = false;
-        ClientSize = new Size(360, 132);
+        // Wide enough for the longest reading the readout can produce, which is
+        // the 0% one: "0% dim | 255 (pure white) displays as 255 | k = 1.00".
+        // Measured rather than guessed -- DialogShot reports whether every label
+        // fits, and this dialog is the one that grew when the wording changed.
+        ClientSize = new Size(420, 132);
 
-        _bar.SetBounds(12, 34, 336, 45);
+        _bar.SetBounds(12, 34, 396, 45);
         _bar.Minimum = 0; _bar.Maximum = 90; _bar.TickFrequency = 5;
         _bar.Value = Math.Max(0, Math.Min(90, start));
         _bar.ValueChanged += delegate { Sync(); };
         Controls.Add(_bar);
 
-        _read.SetBounds(12, 10, 336, 20);
+        _read.SetBounds(12, 10, 396, 20);
         Controls.Add(_read);
 
         var ok = new Button { Text = "OK", DialogResult = DialogResult.OK };
-        ok.SetBounds(184, 92, 80, 26);
+        ok.SetBounds(244, 92, 80, 26);
         var cancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel };
-        cancel.SetBounds(268, 92, 80, 26);
+        cancel.SetBounds(328, 92, 80, 26);
         Controls.Add(ok); Controls.Add(cancel);
         AcceptButton = ok; CancelButton = cancel;
 
@@ -2118,11 +2177,14 @@ internal sealed class StrengthDialog : Form
 
     private void Sync()
     {
-        // En dashes rather than runs of spaces. The three readings are one
-        // sentence about the same number, and a gap wide enough to separate them
-        // is also wide enough to read as a mistake.
+        // Three readings of one number, separated by pipes: the percentage is
+        // the setting, the middle is what the brightest pixel on the screen
+        // actually becomes, and k is what the compositor multiplies by. The
+        // middle reading names its input as well as its output -- "255 (pure
+        // white) displays as 204" says which direction the sum runs, where
+        // "white 255 becomes 204" left the reader to infer it.
         _read.Text = string.Format(CultureInfo.InvariantCulture,
-            "{0}% dim – white 255 becomes {1} – k = {2:0.00}",
+            "{0}% dim | 255 (pure white) displays as {1} | k = {2:0.00}",
             _bar.Value, (int)Math.Round(255 * (1 - _bar.Value / 100.0)), 1 - _bar.Value / 100.0);
     }
 }

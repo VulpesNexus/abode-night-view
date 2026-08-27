@@ -48,9 +48,26 @@ First public release.
 - Everything a product has to say about itself now goes in one parenthesis after
   its name — `Photoshop 2026 (no document open)` — and the tray text is produced
   by pure functions, so every line the user reads can be asserted mechanically.
+- **The Strength window reads `20% dim | 255 (pure white) displays as 204 | k =
+  0.80`.** Three readings of one number, and the middle one now names its input
+  as well as its output: `white 255 becomes 204` left the reader to work out
+  which way the arithmetic ran. The window grew to fit the longest of them.
 
 ### Fixed
 
+- **The hover text and the tray menu contradicted each other.** A Photoshop that
+  was running, selected and showing no document was `Photoshop 2026 (no document
+  open)` in the menu and `no target` on hover, at the same moment, about the same
+  program. The two were answering different questions — the menu surveyed the
+  desktop, the hover counted attached overlays and called zero of them "no
+  target" — and the comment above the tooltip claimed they could not disagree.
+  There is now one survey and two renderings of it, and the hover names the same
+  four states the menu does: `no target`, `no document open`, `unsupported
+  version`, `nothing to dim`.
+- **The hover text went stale.** It was rebuilt only when the user clicked
+  something, so opening a document left it reading `no target` until the next
+  visit to the menu. It now also refreshes when the number of overlays or of
+  detected frames changes.
 - **An unticked product reported a different state from a ticked one.** The
   engine only tracks windows for products that are switched on, and anything
   else was assumed unhookable — so a perfectly healthy Photoshop sitting on its

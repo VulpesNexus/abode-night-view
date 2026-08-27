@@ -329,17 +329,40 @@ tell a reader which was right. Both now enumerate.
 and `Disabled`, and the enabled state also carries a checkmark. One or the other
 alone was ambiguous — a lone "Enabled" reads equally as a label and as a button.
 
-The Strength window states the same number three ways — `55% dim – white 255
-becomes 115 – k = 0.45` — because the percentage is the setting, 115 is what you
-will see, and k is what the compositor multiplies by.
+The Strength window states the same number three ways — `20% dim | 255 (pure
+white) displays as 204 | k = 0.80` — because the percentage is the setting, 204
+is what you will actually see, and k is what the compositor multiplies by. The
+middle reading names its input as well as its output: `255 (pure white) displays
+as 204` says which way the arithmetic runs, where an earlier `white 255 becomes
+204` left that to be inferred.
 
 Hover text is exactly:
 
     Abode Night View: [ON] | 55%
     Abode Night View: [OFF] | 55%
 
-with `| no target` appended when it is switched on and has nothing to dim,
-because "on but doing nothing" is otherwise indistinguishable from broken.
+with the reason appended when it is switched on and nothing is being dimmed,
+because "on but doing nothing" is otherwise indistinguishable from broken:
+
+| what is true                                     | hover says            |
+| ------------------------------------------------ | --------------------- |
+| nothing selected is running                       | `no target`           |
+| running, and showing no document                  | `no document open`    |
+| running, and this build cannot read its windows   | `unsupported version` |
+| running and readable, but minimised or off-screen | `nothing to dim`      |
+
+Those are the Targets menu's own words, and they are not a second opinion: the
+hover and the menu are two renderings of one survey of the desktop. They used to
+be two ideas of what a target *is* — the menu asked the desktop, the hover
+counted overlays and called zero of them "no target" — so a Photoshop sitting on
+its welcome screen was `Photoshop 2026 (no document open)` in the menu and
+`no target` on hover, at the same moment, about the same program. An application
+that is running and selected **is** a target; whether it is currently offering
+anything to dim is a different question, and the hover now answers that one.
+
+The hover is also rebuilt when the number of overlays or the number of frames
+changes, not only when you click something. Before, opening a document left the
+tooltip reading `no target` until the next time you touched the menu.
 
 The notification is one line of the same state:
 
@@ -999,7 +1022,7 @@ Development-tree tools:
 
 ```powershell
 .\Audit.exe               # 56 mechanical checks against windows it owns
-.\Audit.exe --selftest    # 245 checks: hotkeys, settings, migration, adapters,
+.\Audit.exe --selftest    # 264 checks: hotkeys, settings, migration, adapters,
                           #   the schedule, the notification, restart state,
                           #   dialog layout, text measurement, text spacing,
                           #   and the licence notice

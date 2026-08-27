@@ -216,6 +216,19 @@ foreach ($gone in 'Strength  (', 'Schedule  (', 'Targets  (', '%   (k = ', 'Cust
 }
 Write-Host "  no hand-padded separator survives in a label" -ForegroundColor DarkGray
 
+# The strength readout, and the hover text's reason for dimming nothing. Both
+# were reported by the user against a shipped binary, so both are asserted
+# against the artifact. 'white 255 becomes' is the superseded wording; it is
+# checked as plain ASCII because the string it came from carried en dashes and
+# the point here is to catch the phrase, not the punctuation around it.
+if ($text.Contains('white 255 becomes')) {
+    throw "the superseded strength readout is still in the binary"
+}
+foreach ($needed in '% dim | 255 (pure white) displays as ', 'nothing to dim') {
+    if (-not $text.Contains($needed)) { throw "expected string missing from the binary: '$needed'" }
+}
+Write-Host "  the strength readout and the hover reasons are the current ones" -ForegroundColor DarkGray
+
 # 4c. Licence and provenance.
 #
 # The GPL asks a program to be able to show its notice. Shipping a binary that

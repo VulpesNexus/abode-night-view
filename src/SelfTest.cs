@@ -1197,26 +1197,62 @@ internal static class SelfTest
         for (int i = 0; i < 2; i++)
         {
             bool on = i == 0;
-            string tip = TrayState.Tooltip(on, 55, 1);
+            string tip = TrayState.Tooltip(on, 55, 1, 1, 0, 0);
             string word = TrayState.EnabledText(on);
             Check(tip.Contains("[ON]") == (word == "Enabled") &&
                   tip.Contains("[OFF]") == (word == "Disabled"),
                   "tooltip and menu agree for enabled=" + on, tip + "  /  " + word);
         }
 
-        Check(TrayState.Tooltip(true, 55, 1) == "Abode Night View: [ON] | 55%",
-              "tooltip is exactly the format asked for", TrayState.Tooltip(true, 55, 1));
-        Check(TrayState.Tooltip(false, 55, 1) == "Abode Night View: [OFF] | 55%",
-              "and in the off state", TrayState.Tooltip(false, 55, 1));
-        Check(!TrayState.Tooltip(true, 55, 1).Contains("Neutral"),
+        Check(TrayState.Tooltip(true, 55, 1, 1, 0, 0) == "Abode Night View: [ON] | 55%",
+              "tooltip is exactly the format asked for", TrayState.Tooltip(true, 55, 1, 1, 0, 0));
+        Check(TrayState.Tooltip(false, 55, 1, 1, 0, 0) == "Abode Night View: [OFF] | 55%",
+              "and in the off state", TrayState.Tooltip(false, 55, 1, 1, 0, 0));
+        Check(!TrayState.Tooltip(true, 55, 1, 1, 0, 0).Contains("Neutral"),
               "the only mode there is is not named: the word never varies", null);
-        Check(TrayState.Tooltip(true, 55, 0).EndsWith("| no target"),
-              "on with nothing to dim says so", TrayState.Tooltip(true, 55, 0));
-        Check(!TrayState.Tooltip(false, 55, 0).Contains("no target"),
+        Check(TrayState.Tooltip(true, 55, 0, 0, 0, 0).EndsWith("| no target"),
+              "on with nothing running at all says no target",
+              TrayState.Tooltip(true, 55, 0, 0, 0, 0));
+        Check(!TrayState.Tooltip(false, 55, 0, 0, 0, 0).Contains("no target"),
               "off does not, because there is nothing to be missing", null);
-        Check(TrayState.Tooltip(true, 100, 0).Length <= TrayState.TooltipLimit,
+        Check(TrayState.Tooltip(true, 100, 0, 0, 0, 0).Length <= TrayState.TooltipLimit,
               "the longest tooltip still fits the shell's 63-character limit",
-              TrayState.Tooltip(true, 100, 0).Length + " characters");
+              TrayState.Tooltip(true, 100, 0, 0, 0, 0).Length + " characters");
+
+        // ------------------------------------------------------------------
+        // The reported bug, as an assertion. Photoshop is running, selected,
+        // and showing its welcome screen: the menu calls that
+        // "Photoshop 2026 (no document open)" and the tooltip used to call the
+        // same machine "no target". One product, one survey, two renderings --
+        // so the two are checked against each other here rather than each
+        // against a literal.
+        // ------------------------------------------------------------------
+        string menuRow = TrayState.Labelled("Photoshop 2026", "no document open");
+        string hover   = TrayState.Tooltip(true, 55, 0, 1, 1, 0);
+
+        Check(!hover.Contains("no target"),
+              "a running selected product is never called 'no target'", hover);
+        Check(hover.EndsWith("| no document open"),
+              "the hover gives the menu's reason, not a count of overlays", hover);
+        Check(menuRow.Contains(TrayState.IdleReason(1, 1, 0)),
+              "hover and menu row use the same words for the same situation",
+              menuRow + "  /  " + hover);
+
+        Check(TrayState.IdleReason(0, 0, 0) == "no target",
+              "nothing running is the only thing called no target", null);
+        Check(TrayState.IdleReason(1, 0, 1) == "unsupported version",
+              "a running product this build cannot read says which", null);
+        Check(TrayState.IdleReason(1, 0, 0) == "nothing to dim",
+              "running, readable and off-screen is neither of the above", null);
+        Check(TrayState.IdleReason(2, 1, 1) == "no document open",
+              "with several reasons at once the actionable one wins", null);
+
+        foreach (int r in new[] { 0, 1, 4 })
+            foreach (int nd in new[] { 0, 1 })
+                foreach (int un in new[] { 0, 1 })
+                    Check(TrayState.Tooltip(true, 90, 0, r, nd, un).Length <= TrayState.TooltipLimit,
+                          "every reason still fits the 63-character budget",
+                          TrayState.Tooltip(true, 90, 0, r, nd, un));
 
         // The notification balloon's first line. Asserted character for
         // character: it is the one line the user reads at launch, and k is the
@@ -1325,7 +1361,14 @@ internal static class SelfTest
             {
                 lines.Add(TrayState.StrengthItem(v));
                 lines.Add(TrayState.StatusLine(on, v));
-                lines.Add(TrayState.Tooltip(on, v, on ? 2 : 0));
+
+                // Every hover the tray can produce: attached, and each of the
+                // four reasons it can give for dimming nothing.
+                lines.Add(TrayState.Tooltip(on, v, 2, 1, 0, 0));
+                lines.Add(TrayState.Tooltip(on, v, 0, 0, 0, 0));
+                lines.Add(TrayState.Tooltip(on, v, 0, 1, 1, 0));
+                lines.Add(TrayState.Tooltip(on, v, 0, 1, 0, 1));
+                lines.Add(TrayState.Tooltip(on, v, 0, 1, 0, 0));
             }
         }
         for (int sel = 0; sel <= 5; sel++)

@@ -115,20 +115,49 @@ internal static class TrayState
     public const int TooltipLimit = 63;
 
     /// <summary>
-    /// Format is fixed: "Abode Night View: [ON] | 55%". Derived from the same
-    /// values the menu derives from, so the two cannot disagree.
+    /// Why nothing is being dimmed, in the words the Targets menu uses for the
+    /// same situation. The counts come from one survey of the desktop, so the
+    /// hover text and the menu are two renderings of a single answer.
+    ///
+    /// The reported bug was the tooltip saying "no target" while the menu said
+    /// "Photoshop 2026 (no document open)" -- both true of their own inputs and
+    /// contradictory on screen, because the tooltip was counting attached
+    /// overlays and calling zero of them "no target". An application that is
+    /// running and selected IS a target; whether it currently offers anything
+    /// to dim is a different question, and this is where it gets answered.
+    /// </summary>
+    public static string IdleReason(int running, int noDocument, int unsupported)
+    {
+        if (running <= 0) return "no target";
+        if (noDocument > 0) return "no document open";
+        if (unsupported > 0) return "unsupported version";
+
+        // Selected, running, readable, and still nothing on screen: minimised,
+        // or its window is off the visible desktop. Not an error, and not
+        // "no target" either.
+        return "nothing to dim";
+    }
+
+    /// <summary>
+    /// Format is fixed: "Abode Night View: [ON] | 55%", with the reason nothing
+    /// is dimmed appended when there is one. Derived from the same survey the
+    /// menu is built from, so the two cannot disagree -- which the three-argument
+    /// version of this function claimed in this comment and did not do.
     ///
     /// The filter name used to sit between the two. It was removed because it
     /// is the same word in every possible state -- Neutral is the only mode
     /// this build renders -- so it spent a third of a 63-character budget
     /// saying nothing. Dropping it is also what let the product be named in
-    /// full here instead of as "Abode NV".
+    /// full here instead of as "Abode NV", and it is what leaves room for the
+    /// reason above.
     /// </summary>
-    public static string Tooltip(bool enabled, int strength, int liveOverlays)
+    public static string Tooltip(bool enabled, int strength, int liveOverlays,
+                                 int running, int noDocument, int unsupported)
     {
         string s = string.Format(CultureInfo.InvariantCulture,
             "Abode Night View: [{0}] | {1}%", enabled ? "ON" : "OFF", strength);
-        if (enabled && liveOverlays == 0) s += " | no target";
+        if (enabled && liveOverlays == 0)
+            s += " | " + IdleReason(running, noDocument, unsupported);
         return s.Length > TooltipLimit ? s.Substring(0, TooltipLimit) : s;
     }
 
