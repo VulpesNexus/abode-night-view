@@ -609,6 +609,16 @@ internal static class Audit
         Check(!Native.IsWindowVisible(ov), "overlay hides when the target window goes away",
               "visible = " + Native.IsWindowVisible(ov));
 
+        // Hiding is only half of detaching. The overlay is owned by the target --
+        // a link into ANOTHER process's window tree -- and a released slot that
+        // stays owned is a window we have volunteered to have destroyed the moment
+        // the application quits. This is checked here rather than trusted because
+        // nothing about it is visible: the overlay looks correct either way.
+        IntPtr ownerAfterDetach = Native.GetWindow(ov, Native.GW_OWNER);
+        Check(ownerAfterDetach == IntPtr.Zero,
+              "and hands the owner link back instead of staying owned by a window it left",
+              "owner = 0x" + ownerAfterDetach.ToInt64().ToString("X8"));
+
         _form.Show();
         Pump(1200);
         Native.RECT want = Native.ClientRectOnScreen(_form.Handle);
@@ -622,6 +632,14 @@ internal static class Audit
         Check(back, "overlay reacquires the target when it comes back",
               back ? sw.Elapsed.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture) + " ms"
                    : "did not reacquire within 2.5 s");
+
+        // ... and takes the link back, so giving it up on detach is not a one-way
+        // door that quietly leaves the overlay running as zmode=above afterwards.
+        IntPtr ownerAfterReacquire = Native.GetWindow(ov, Native.GW_OWNER);
+        Check(ownerAfterReacquire == _form.Handle,
+              "and takes ownership again, rather than degrading to chasing the z-order",
+              "owner = 0x" + ownerAfterReacquire.ToInt64().ToString("X8") +
+              ", target = 0x" + _form.Handle.ToInt64().ToString("X8"));
 
         _form.Minimise();
         Pump(1600);

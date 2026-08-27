@@ -55,6 +55,18 @@ First public release.
 
 ### Fixed
 
+- **An overlay kept the owner link after it stopped using it.** Attaching makes
+  the overlay an owned window of the Adobe frame; nothing ever took that back.
+  A released overlay therefore stayed owned by a window it was no longer on, and
+  since Windows destroys a window's owned windows along with the owner, the
+  pooled spare was a window volunteered for destruction the next time that
+  application quit — paid back as a create/destroy cycle the pool exists to
+  avoid. The decision to re-own also trusted a cached handle, and window handles
+  are recycled: a stale one matching a brand-new frame would skip the re-own and
+  leave the overlay owned by whatever else had been given that handle. The link
+  is now dropped on detach and before the window is destroyed, and the re-own
+  asks the window rather than the cache. `Audit.exe` asserts both directions in
+  its lifecycle section.
 - **The hover text and the tray menu contradicted each other.** A Photoshop that
   was running, selected and showing no document was `Photoshop 2026 (no document
   open)` in the menu and `no target` on hover, at the same moment, about the same

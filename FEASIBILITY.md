@@ -633,9 +633,10 @@ irrelevant to us.
 
 **Environment**
 
-10. `cmd.exe` resolves paths in the OEM codepage and **cannot `cd` into
-    `…\ギャル教育_漫画\`** — `build.cmd` fails there with "not recognized as an
-    internal or external command". Use `build.ps1`. (This is why it exists.)
+10. `cmd.exe` resolves paths in the OEM codepage and **cannot `cd` into a
+    directory whose name is outside it** — under a path with CJK characters in
+    it, `build.cmd` fails with "not recognized as an internal or external
+    command". Use `build.ps1`. (This is why it exists.)
 11. PowerShell 5.1 reads `.ps1` files as ANSI unless they carry a UTF-8 BOM, so
     a non-ASCII path baked into a script becomes mojibake. All the test scripts
     here are deliberately ASCII-only and take paths as parameters.

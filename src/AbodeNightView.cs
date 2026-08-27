@@ -218,6 +218,27 @@ internal sealed class OverlaySlot
     {
         InUse = false; Frame = IntPtr.Zero; Viewport = IntPtr.Zero;
         Hide();
+        Disown();
+    }
+
+    /// <summary>
+    /// Drop the owner link.
+    ///
+    /// Ownership is the only state this program leaves inside another process's
+    /// window tree, and setting it was the easy half. A slot that is no longer
+    /// attached to anything has no business still being owned by an Adobe frame:
+    /// Windows destroys a window's owned windows with it, so a pooled spare left
+    /// owned is a window we have volunteered to have destroyed, and OwnedTo --
+    /// which --diagnostics prints -- would go on naming a frame we are not on.
+    ///
+    /// Idempotent and guarded on OwnedTo, because Release() runs on every sync:
+    /// once the link is gone this costs a comparison.
+    /// </summary>
+    public void Disown()
+    {
+        if (OwnedTo == IntPtr.Zero) return;
+        if (Alive) Native.SetWindowLongPtr(Hwnd, Native.GWLP_HWNDPARENT, IntPtr.Zero);
+        OwnedTo = IntPtr.Zero;
     }
 
     public void Hide()
@@ -235,6 +256,10 @@ internal sealed class OverlaySlot
 
     public void Destroy()
     {
+        // Before Close(), not after: once the window is gone the handle cannot be
+        // used to take the link back off, and closing a window that is still owned
+        // by a foreign frame is the one ordering that leaves the link behind.
+        Disown();
         try { if (Alive) Window.Close(); } catch { }
         try { Window.Dispose(); } catch { }
         Hwnd = IntPtr.Zero;
@@ -561,7 +586,13 @@ internal sealed class AbodeNvContext : ApplicationContext
             ft.Viewports.Clear(); ft.LastRects.Clear();
             ft.SinceFullScan = int.MaxValue; ft.Misses = 0;
         }
-        foreach (var s in _slots) { s.OwnedTo = IntPtr.Zero; s.Shown = false; s.LastRect = new Native.RECT(); }
+        // Ownership is deliberately NOT touched here. It used to be cleared -- the
+        // field only, not the link -- to force the next Place() to re-own. That is
+        // no longer needed now that Place() asks the window who owns it, and doing
+        // it anyway would be worse than useless: a display change is not a change
+        // of owner, so dropping the link would give up the one guarantee that
+        // survives the topology change and re-take it a moment later.
+        foreach (var s in _slots) { s.Shown = false; s.LastRect = new Native.RECT(); }
         Sync(true);
     }
 
@@ -892,13 +923,24 @@ internal sealed class AbodeNvContext : ApplicationContext
             // one-frame gap that chasing the z-order leaves behind. Ownership is
             // not parenting: it sets the owner of a top-level window and does not
             // attach input queues.
-            if (slot.OwnedTo != ft.Frame)
+            //
+            // Ask the window, not the bookkeeping field. Window handles are
+            // recycled, so a stale OwnedTo can match a BRAND NEW frame that Windows
+            // happened to hand a destroyed one's handle -- and the re-own would
+            // then be skipped for a window we do not actually own. One GetWindow
+            // call, on a path that already makes several.
+            if (Native.GetWindow(slot.Hwnd, Native.GW_OWNER) != ft.Frame)
             {
                 Native.SetWindowLongPtr(slot.Hwnd, Native.GWLP_HWNDPARENT, ft.Frame);
                 if (Native.GetWindow(slot.Hwnd, Native.GW_OWNER) == ft.Frame)
                     slot.OwnedTo = ft.Frame;
                 else
-                    slot.ZMode = "above";       // ownership refused; chase the z-order
+                {
+                    // Refused. Drop whatever link is still installed rather than
+                    // chasing the z-order by hand with another frame's owner set.
+                    slot.Disown();
+                    slot.ZMode = "above";
+                }
 
                 // Take ownership and then SIT DOWN: place the overlay directly
                 // above the frame, below everything else the application owns.
@@ -1827,11 +1869,6 @@ internal sealed class AbodeNvContext : ApplicationContext
 //  About
 // ---------------------------------------------------------------------------
 /// <summary>
-/// Deliberately tiny: an icon, three lines of text, and a Close button. The
-/// repository link is created only when there is a repository to link to, so the
-/// current release shows no link rather than a dead one.
-/// </summary>
-/// <summary>
 /// An icon, drawn as an icon.
 ///
 /// PictureBox wants an Image, and the only way to get one out of an Icon is
@@ -1866,6 +1903,13 @@ internal sealed class IconView : Control
     }
 }
 
+/// <summary>
+/// Deliberately tiny: an icon, a few lines of text, and a Close button.
+///
+/// The repository line is conditional on AboutInfo.HasRepository rather than
+/// hard-coded, so a build made before the repository existed showed no link
+/// instead of a dead one. It resolves now, and --selftest asserts that it does.
+/// </summary>
 internal sealed class AboutDialog : Form
 {
     /// <summary>The one wrap width. Every paragraph is wrapped to it and the

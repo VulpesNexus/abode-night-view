@@ -890,6 +890,18 @@ its owner and raises the pair together, so activating the application cannot
 produce even the one-frame gap that chasing the z-order leaves behind. Ownership
 is not parenting: it does not attach input queues.
 
+The link is also **given back**. It is the only state this program leaves inside
+another process's window tree, so it is dropped the moment an overlay stops being
+attached — when the document goes away, and before the window is destroyed at
+exit. Two reasons, neither cosmetic: Windows
+destroys a window's owned windows along with the owner, so a pooled spare left
+owned is a window volunteered for destruction the next time the application
+quits; and the check that decides whether to re-own asks the window
+(`GetWindow(GW_OWNER)`) rather than a cached handle, because window handles are
+recycled and a stale one can match a brand-new frame. `Audit.exe` asserts both
+halves — that detaching returns the owner to `NULL`, and that reacquiring takes
+it back rather than silently degrading to `zmode=above`.
+
 Ownership is necessary but **not sufficient**, and the invariant is re-checked
 every sync. Three separate faults are corrected:
 
