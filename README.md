@@ -1,5 +1,7 @@
 # Abode Night View
 
+[![build](https://github.com/VulpesNexus/abode-night-view/actions/workflows/build.yml/badge.svg)](https://github.com/VulpesNexus/abode-night-view/actions/workflows/build.yml)
+
 A display-only dimmer for Adobe document viewports.
 
 At 2am a page of white paper at full brightness is a lamp pointed at your face.

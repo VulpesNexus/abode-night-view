@@ -1528,11 +1528,22 @@ internal sealed class AbodeNvContext : ApplicationContext
                 }
                 else Diag.Write(w);
             }
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path)
-            { UseShellExecute = true });
+            // Opening the report is a convenience; writing it is the job. They are
+            // caught separately because a machine with no handler for .txt -- a
+            // build agent, a stripped server install -- would otherwise be told
+            // the write failed when it did not, and told so in a MODAL box, on a
+            // command-line switch nobody is sitting in front of. --diagnostics
+            // runs in the release smoke test and in CI; it must always terminate.
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path)
+                { UseShellExecute = true });
+            }
+            catch { }
         }
         catch (Exception ex)
         {
+            // The report could not be WRITTEN, which is worth interrupting for.
             MessageBox.Show("Could not write the report:\n" + ex.Message,
                 "Abode Night View (Diagnostics)", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }

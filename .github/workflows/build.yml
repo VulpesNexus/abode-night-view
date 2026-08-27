@@ -1,0 +1,85 @@
+# =============================================================================
+#  Abode Night View - continuous integration
+# -----------------------------------------------------------------------------
+#  Windows only, and deliberately so: this project compiles with the csc.exe that
+#  ships with the .NET Framework, which is an OS component. There is nothing to
+#  restore, nothing to install and no container -- the runner already has the
+#  whole toolchain, which is the same claim the README makes to anyone cloning it.
+#  If this workflow ever needs a setup step, that claim has stopped being true.
+#
+#  Windows PowerShell 5.1 (`shell: powershell`), not PowerShell 7 (`pwsh`). The
+#  scripts are written for, documented against and tested on 5.1; running CI on a
+#  different host would test something nobody actually uses.
+#
+#  What runs here is everything that does NOT need a desk:
+#
+#    build.ps1              compiles all seven binaries from a clean checkout
+#    Audit.exe --selftest   264 assertions -- settings, migration, schedule,
+#                           hotkey parsing, tray and About wording
+#    build-release.ps1      builds dist\AbodeNightView.exe and runs it: version
+#                           resource, --diagnostics, --probe, portable settings,
+#                           embedded icons, GPL notice, and the absence of every
+#                           removed feature
+#
+#  What deliberately does NOT run here is `Audit.exe` with no arguments. That
+#  harness drives real windows and photographs them, and it refuses to measure a
+#  target something else is covering -- correctly, but a headless runner cannot
+#  promise it an unobstructed desktop. It is a local gate, not a CI one.
+# =============================================================================
+
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A superseded run tells you nothing once a newer commit exists.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compiler is in the box
+        shell: powershell
+        run: |
+          $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+          if (-not (Test-Path -LiteralPath $csc)) { throw "no in-box csc.exe at $csc" }
+          Write-Host "csc      $((Get-Item -LiteralPath $csc).VersionInfo.ProductVersion)"
+          Write-Host "host     $($PSVersionTable.PSVersion) / $($PSVersionTable.PSEdition)"
+
+      # Builds everything, and generates the icons from assets\*.png on the way --
+      # so this also proves a clean checkout carries enough to build itself.
+      - name: Build
+        shell: powershell
+        run: .\build.ps1
+
+      # Console subsystem, and returns 1 if any assertion failed, so the exit code
+      # is the gate. No redirect needed; the log gets the whole report.
+      - name: Self-test
+        shell: powershell
+        run: .\Audit.exe --selftest
+
+      - name: Release build and smoke test
+        shell: powershell
+        run: .\build-release.ps1
+
+      - name: Upload the artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AbodeNightView-${{ github.sha }}
+          path: dist/AbodeNightView.exe
+          if-no-files-found: error
+          retention-days: 30

@@ -55,6 +55,12 @@ First public release.
 
 ### Fixed
 
+- **`--diagnostics` could stop on a message box nobody was there to click.**
+  Writing the report and opening it were caught together, so a machine with no
+  handler registered for `.txt` — a build agent, a stripped server install —
+  was told the report could not be *written* when it had been, and told so in a
+  modal dialog, on a command-line switch that runs unattended. The two are now
+  caught separately: a failed open is silent, and only a failed write interrupts.
 - **An overlay kept the owner link after it stopped using it.** Attaching makes
   the overlay an owned window of the Adobe frame; nothing ever took that back.
   A released overlay therefore stayed owned by a window it was no longer on, and
