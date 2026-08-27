@@ -975,7 +975,7 @@ every sync. Three separate faults are corrected:
    enforced when the owner is *activated*, not when it is re-ordered some other
    way. Showing another owned window raises the owner without taking the overlay
    with it, and the dimming then silently stops. Regression-tested: reproduced
-   deterministically, recovery measured at 59-185 ms single-target and 135-250 ms
+   deterministically, recovery measured at 59–185 ms single-target and 135–250 ms
    with several targets tracked, over four consecutive runs.
 2. **A foreign window sandwiched between overlay and owner.** With two maximised
    Adobe applications on one monitor, InDesign's overlay can be left above

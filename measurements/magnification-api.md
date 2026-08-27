@@ -6,7 +6,7 @@ Source window: Adobe InDesign 21.5.1 document canvas (`DroverLord - Window Class
 entirely inside the canvas. Tool: `ProtoC.exe` (WC_MAGNIFIER at 1.0x in a
 click-through layered host) + `Verify.exe --shot` + a pixel differ.
 
-Every run: `--exclude=filter --zmode=topmost --interval=16`, capture taken 5-6 s
+Every run: `--exclude=filter --zmode=topmost --interval=16`, capture taken 5–6 s
 after start.
 
 | mode        | matrix asked for                | measured result                                   |
@@ -29,7 +29,7 @@ after start.
 3. **Channel mixing did not happen.** A pure Rec.709 grayscale matrix behaved as a
    *neutral* gain of k with saturation fully preserved and scaled by k. Every one
    of the five results is consistent with the implementation collapsing each
-   colour column to its sum and applying it as a per-channel gain -- which is
+   colour column to its sum and applying it as a per-channel gain — which is
    exactly "affine per channel, no mixing".
 
    This is the whole reason Greyscale cannot be built on this API here: the one
@@ -42,11 +42,11 @@ after start.
 4. **Recursion is solved by `MagSetWindowFilterList(MW_FILTERMODE_EXCLUDE)`.**
    Returned TRUE; no mirror artefact in any capture.
    `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` also works and additionally
-   makes the host invisible to GDI screen capture -- which is why the first
+   makes the host invisible to GDI screen capture — which is why the first
    attempt at this measurement read "no change" for every mode.
 
-5. **Cost, idle, over a 2063x1227 source:** 36-38 refreshes/s against a 16 ms
-   timer, 0.1-0.3 % CPU, 68-71 MB working set.
+5. **Cost, idle, over a 2063x1227 source:** 36–38 refreshes/s against a 16 ms
+   timer, 0.1–0.3 % CPU, 68–71 MB working set.
 
 6. **Latency is structural, not incidental.** There is no "the source repainted"
    notification, so the host is refreshed on a timer. It therefore renders a copy

@@ -13,11 +13,23 @@ back out of the built binary's own version resource.
 
 ## Unreleased
 
-Nothing in the program changed. This is the build, on the first day it ever ran
-anywhere but the machine it was written on.
+Nothing in the program changed. This is the build and the documents: the first
+day the build ran anywhere but the machine it was written on, and a pass over
+what the repository would say about that machine once it was published.
 
 ### Fixed
 
+- **The About screenshot showed the stock Windows application icon.** The
+  program was never at fault. `AppIcon` reads the picture out of the running
+  executable's own Win32 icon group, and the screenshot harness is built by
+  hand, without `-win32icon` — so it had no icon group, `LoadImage` returned
+  NULL, `ExtractAssociatedIcon` fell back to the stock picture, and the About
+  box faithfully drew what it was handed. Established by reading the shipped
+  binary's resources directly (icon group 32512, entries at every size asked
+  for) and by rendering what `AppIcon` actually returns, rather than by
+  inspecting the code and believing it. The harness now embeds the icon.
+  `about.png` is the only screenshot that changed: it is the only window that
+  paints the icon into its body rather than leaving it to the title bar.
 - **The release build's portable-settings check failed on every GitHub-hosted
   Windows runner**, whose `%TEMP%` is an 8.3 short path: `C:\Users\RUNNER~1\`
   `AppData\Local\Temp`. The check built the path it expected out of `%TEMP%`
@@ -28,6 +40,22 @@ anywhere but the machine it was written on.
   beside the executable and looked for in the directory `--diagnostics` names.
   The failure quotes both paths now, too, because the first machine it ever
   failed on is one nobody can log into.
+
+### Changed
+
+- **`assets/source-icon-cool.png` no longer carries an XMP packet.** Saving it
+  out of Photoshop wrote the editing software and its version, two timestamps
+  carrying a UTC offset, and the document lineage identifiers into the file.
+  None of that is artwork, and all of it would have been published along with
+  the picture. The metadata chunk was cut out of the PNG stream rather than the
+  image being re-encoded, so the pixels are provably untouched rather than
+  probably untouched: 0 of 50,304 differ, and the `.ico` built from it after is
+  byte for byte the one built before. `source-icon.png` never had a packet.
+- Five double hyphens standing in for em dashes, in prose, are em dashes.
+- Six numeric ranges written with a hyphen are en dashes, which is how every
+  other range in these documents is written — `36-38 refreshes/s` in
+  `measurements\` was the same measurement as `36–38 refreshes/s` in
+  FEASIBILITY.md, spelled two ways in two files.
 
 ---
 

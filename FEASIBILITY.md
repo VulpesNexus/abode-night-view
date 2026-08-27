@@ -7,8 +7,8 @@ break it. Phase 3 (section 13) generalised it to five Adobe products and renamed
 the product **Abode Night View**. Phase 4 (section 14) is the release pass for
 1.2.0: what was removed, what the rulers turned out to be, and what shipped.
 
-Sections 0-12 are phases 1 and 2 and are left as written, which is why they call
-the product "Night View" -- that was its name at the time, and rewriting an
+Sections 0–12 are phases 1 and 2 and are left as written, which is why they call
+the product "Night View" — that was its name at the time, and rewriting an
 engineering log to match a later decision makes it useless as a record. Where a
 name, a number or a conclusion has changed since, the current one is in section
 13 or 14.

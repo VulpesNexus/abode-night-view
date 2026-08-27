@@ -29,7 +29,7 @@ to quote.
 The 1-target row reading *higher* than the 4-target row is measurement noise at
 this resolution, not a real inversion; both are under 1 % of one core. What the
 table does establish is the shape: tracking is event-driven, so the cost is
-roughly flat in the number of targets, and it goes to zero -- not to "small" --
+roughly flat in the number of targets, and it goes to zero — not to "small" —
 when there is nothing to dim.
 
 ## Where the work happens
@@ -51,9 +51,9 @@ calls each (`IsWindow`, `IsWindowVisible`, `GetWindowRect`).
 
 Not separately measurable here: the overlays are ordinary layered windows, so
 their cost is a blend DWM was already doing for the desktop. There is no
-capture, no swap chain and no per-frame work of our own -- which is precisely
+capture, no swap chain and no per-frame work of our own — which is precisely
 the difference between this and the Magnification-API path measured in
-`magnification-api.md`, which redraws a copy 36-38 times a second whether
+`magnification-api.md`, which redraws a copy 36–38 times a second whether
 anything changed or not.
 
 ## Overlay count
