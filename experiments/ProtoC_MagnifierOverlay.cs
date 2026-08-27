@@ -14,10 +14,10 @@
 //      Not magnification. A WC_MAGNIFIER control at a magnification factor of
 //      exactly 1.0, hosted in a borderless click-through layered window parked
 //      precisely over the InDesign document canvas, with the canvas itself as
-//      the source rectangle, and a MAGCOLOREFFECT colour matrix applied.
+//      the source rectangle, and a MAGCOLOREFFECT color matrix applied.
 //
 //  Why bother, when Prototype B already dims?
-//      MAGCOLOREFFECT is a full 5x5 GDI+ colour matrix, so it can do things
+//      MAGCOLOREFFECT is a full 5x5 GDI+ color matrix, so it can do things
 //      alpha blending cannot: per-channel gain (true warm dim), channel mixing
 //      (grayscale), and inversion. It still cannot do a non-linear curve - the
 //      matrix is affine by construction. See FEASIBILITY.md.
@@ -87,7 +87,7 @@ internal static class Mag
     }
 
     /// <summary>
-    /// float[5][5] colour matrix, GDI+ semantics: the colour is the ROW vector
+    /// float[5][5] color matrix, GDI+ semantics: the color is the ROW vector
     /// [R G B A 1] multiplied on the LEFT of the matrix. So element [i][j] is
     /// "how much of input channel i goes into output channel j", row 4 holds
     /// the additive offsets, and column 4 must be (0,0,0,0,1).

@@ -335,7 +335,7 @@ internal sealed class ViewportLocator
     ///
     /// The instance and the frame are both LATCHED once chosen and kept until the
     /// window they refer to is destroyed. Re-deciding on every call would make the
-    /// behaviour non-deterministic with more than one InDesign open, because the
+    /// behavior non-deterministic with more than one InDesign open, because the
     /// tie-breakers -- working set, window area -- change while you work, and the
     /// overlay would hop between instances on its own. Tray > Re-attach and
     /// --pid= are the two ways to choose deliberately.

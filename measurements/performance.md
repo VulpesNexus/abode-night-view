@@ -35,7 +35,7 @@ when there is nothing to dim.
 ## Where the work happens
 
 * one 250 ms safety-net timer, always
-* one global WinEvent hook (foreground / move-size / minimise)
+* one global WinEvent hook (foreground / move-size / minimize)
 * **one WinEvent hook per tracked process**, added and removed as applications
   start and quit: 5 processes tracked in the 1.2.0 rows, so 6 hooks in total
 * one `EnumWindows` pass per 250 ms tick to notice applications appearing and
@@ -51,7 +51,7 @@ calls each (`IsWindow`, `IsWindowVisible`, `GetWindowRect`).
 
 Not separately measurable here: the overlays are ordinary layered windows, so
 their cost is a blend DWM was already doing for the desktop. There is no
-capture, no swap chain and no per-frame work of our own — which is precisely
+capture, no swap chain, and no per-frame work of our own — which is precisely
 the difference between this and the Magnification-API path measured in
 `magnification-api.md`, which redraws a copy 36–38 times a second whether
 anything changed or not.

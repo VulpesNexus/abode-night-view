@@ -193,7 +193,7 @@ Write-Host "  tray states and the About attribution are present" -ForegroundColo
 
 # The default shortcuts were withdrawn in 1.3. Their absence cannot be asserted
 # by string search -- Settings.cs still names all four, because a settings file
-# written by 1.2 has to be recognised in order to have them removed. What CAN be
+# written by 1.2 has to be recognized in order to have them removed. What CAN be
 # asserted from outside is that the binary tells the user nothing is bound, and
 # that the schedule that replaces the toggle-by-hand workflow is in there.
 foreach ($needed in 'No shortcut is bound out of the box', 'Abode Night View (Schedule)') {
@@ -280,7 +280,7 @@ foreach ($needed in 'Abode Night View: [OFF]', 'Abode Night View: [ON] | {0}%', 
 }
 Write-Host "  switched off, the hover and the notification carry no strength" -ForegroundColor DarkGray
 
-# 4c. Licence and provenance.
+# 4c. License and provenance.
 #
 # The GPL asks a program to be able to show its notice. Shipping a binary that
 # cannot is not a cosmetic miss, and the About box is the only place it is said,
@@ -293,7 +293,7 @@ foreach ($needed in 'is free software: you can redistribute it',
                     'https://www.gnu.org/licenses/',
                     'https://github.com/VulpesNexus',
                     'https://github.com/VulpesNexus/abode-night-view') {
-    if (-not $text.Contains($needed)) { throw "licence or provenance missing from the binary: '$needed'" }
+    if (-not $text.Contains($needed)) { throw "license or provenance missing from the binary: '$needed'" }
 }
 Write-Host "  the GPL notice and both repository links are in the About box" -ForegroundColor DarkGray
 

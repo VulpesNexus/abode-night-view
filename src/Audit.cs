@@ -273,7 +273,7 @@ internal static class Audit
         foreach (Screen s in Screen.AllScreens)
         {
             Rectangle b = s.Bounds;
-            Add("centred on " + s.DeviceName.Replace(@"\\.\", ""),
+            Add("centered on " + s.DeviceName.Replace(@"\\.\", ""),
                 new Rectangle(b.X + b.Width / 6, b.Y + b.Height / 6, b.Width * 2 / 3, b.Height * 2 / 3));
             Add("full " + s.DeviceName.Replace(@"\\.\", ""), b);
         }
@@ -641,9 +641,9 @@ internal static class Audit
               "owner = 0x" + ownerAfterReacquire.ToInt64().ToString("X8") +
               ", target = 0x" + _form.Handle.ToInt64().ToString("X8"));
 
-        _form.Minimise();
+        _form.Minimize();
         Pump(1600);
-        Check(!Native.IsWindowVisible(ov), "overlay hides while the target is minimised", null);
+        Check(!Native.IsWindowVisible(ov), "overlay hides while the target is minimized", null);
 
         _form.Restore();
         Pump(1200);
@@ -703,7 +703,7 @@ internal static class Audit
     /// <summary>
     /// Is anything that is not ours covering the rectangle we are about to
     /// photograph? Sampled on a 5x5 grid, because a window can cover a corner
-    /// without covering the centre.
+    /// without covering the center.
     ///
     /// This exists because it did happen. The two wedge captures feed Transfer.exe,
     /// which fits the transfer function over every pixel in them, and on a run
@@ -867,10 +867,10 @@ internal static class Audit
             b.ClosePopups();
             Pump(200);
 
-            // --- minimise one frame ----------------------------------------
-            a.Minimise();
+            // --- minimize one frame ----------------------------------------
+            a.Minimize();
             bool onlyB = Await(delegate(List<IntPtr> o) { return o.Count == 1; }, 5000);
-            Check(onlyB, "minimising one application hides only its overlays",
+            Check(onlyB, "minimizing one application hides only its overlays",
                   Overlays().Count + " overlay(s) left");
             Check(onlyB && Covers(b.CanvasRect(0)),
                   "the application still on screen keeps its overlay", null);

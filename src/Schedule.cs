@@ -46,7 +46,7 @@ using System.Globalization;
 //  A wall-clock time of day, to the minute
 // ---------------------------------------------------------------------------
 /// <summary>
-/// Minutes since midnight, normalised into 0..1439. Deliberately not a
+/// Minutes since midnight, normalized into 0..1439. Deliberately not a
 /// TimeSpan: a TimeSpan can be negative, can exceed a day, and prints as
 /// "20:00:00", none of which is wanted for a field a user types "20:00" into.
 /// </summary>

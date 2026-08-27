@@ -33,7 +33,7 @@
 //                  OWL.Document          <- document viewport, incl. rulers/scrollbars
 //                    <inner container>   <- canvas proper, strictly inside
 //
-//      measured, frame maximised on a 2560x1440 monitor:
+//      measured, frame maximized on a 2560x1440 monitor:
 //
 //          product       OWL.Document        inner container      inner/outer
 //          InDesign      43,132 2094x1259    59,148 2063x1227     96 %
@@ -58,7 +58,7 @@
 //
 //  Version policy
 //      There is no version whitelist anywhere in this file. A product is
-//      recognised by process name + frame window class, and then the structure
+//      recognized by process name + frame window class, and then the structure
 //      is probed and validated. An Adobe release from a year that did not exist
 //      when this was written attaches normally if it still looks like this, and
 //      is reported in diagnostics as an unverified version rather than refused.
@@ -84,8 +84,8 @@ internal static class Region
     public const string Window = "window";       // whole application window rect
 
     /// <summary>
-    /// Normalise a region name, including the legacy InDesign-only spelling.
-    /// Returns null for absent, empty or unrecognised input -- deliberately NOT
+    /// Normalize a region name, including the legacy InDesign-only spelling.
+    /// Returns null for absent, empty or unrecognized input -- deliberately NOT
     /// "canvas". This used to fall back to canvas, and the caller that asked
     /// "what did the settings file say for this product?" could not tell an absent
     /// key from a real choice, so every product silently got canvas and the
@@ -131,7 +131,7 @@ internal enum TargetStatus
     /// <summary>Attached: the expected structure was found and validated.</summary>
     Attached,
 
-    /// <summary>The application is recognised, and no document is open in it.</summary>
+    /// <summary>The application is recognized, and no document is open in it.</summary>
     NoDocument,
 
     /// <summary>
@@ -340,7 +340,7 @@ internal class OwlTarget : AdobeTarget
     /// OWL window at all, the frame is made of something this build has never
     /// seen and no amount of opening documents will help.
     ///
-    /// It errs towards NoDocument on purpose: that message costs a user who
+    /// It errs toward NoDocument on purpose: that message costs a user who
     /// does have a document open one confused moment, where a wrong
     /// "unsupported version" costs them the belief that the utility works with
     /// their Adobe release at all.
@@ -437,7 +437,7 @@ internal sealed class AcrobatTarget : AdobeTarget
 }
 
 // ---------------------------------------------------------------------------
-//  A frame window that belongs to a recognised product
+//  A frame window that belongs to a recognized product
 // ---------------------------------------------------------------------------
 internal sealed class DetectedFrame
 {
@@ -690,7 +690,7 @@ internal static class TargetRegistry
         if (missing.Count == 0) return status;
 
         // Ask the desktop for the ones we were handed no frame for. Anything
-        // that comes back has a frame window this build recognises, so it gets
+        // that comes back has a frame window this build recognizes, so it gets
         // the real answer rather than a guess.
         foreach (var d in Discover(missing))
             if (status.ContainsKey(d.Adapter.Id))
@@ -822,7 +822,7 @@ internal static class TargetRegistry
                 w.WriteLine("   pid                  " + f.Pid);
                 w.WriteLine("   frame HWND           " + Hex(f.Frame) + " class " + Native.ClassOf(f.Frame));
                 w.WriteLine("   frame rect           " + Native.RectOf(f.Frame) +
-                            (Native.IsIconic(f.Frame) ? " (MINIMISED)" : ""));
+                            (Native.IsIconic(f.Frame) ? " (MINIMIZED)" : ""));
                 w.WriteLine("   frame client rect    " + Native.ClientRectOnScreen(f.Frame));
                 w.WriteLine("   frame DPI            " + Native.DpiOf(f.Frame) + " (" +
                             (Native.DpiOf(f.Frame) * 100 / 96) + "%)");

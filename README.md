@@ -8,10 +8,10 @@ A display-only dimmer for Adobe document viewports for those late-night crunchin
 
 **Abode Night View** parks a black, click-through, layered window over each Adobe
 document canvas and lets the Windows compositor multiply it down. The panels,
-the menus, the toolbar and everything else on your desktop are untouched.
+the menus, the toolbar, and everything else on your desktop are untouched.
 
 **It never modifies a document.** It reads window geometry and paints its own
-windows. It does not open, script, message, hook or inject into any Adobe
+windows. It does not open, script, message, hook, or inject into any Adobe
 application, and nothing it does can reach a saved file or an export.
 
     AbodeNightView.exe          start it; a moon appears in the tray
@@ -19,11 +19,11 @@ application, and nothing it does can reach a saved file or an export.
     tray → Schedule             on and off by the clock, on a range you set
 
 One file, 387 KB — no installer, no admin rights, no runtime to download.
-Free software under the [GNU GPL v3 or later](#licence).
+Free software under the [GNU GPL v3 or later](#license).
 
 **No keyboard shortcut is bound out of the box**, on purpose — a global hotkey
 is taken from every program on the machine, not just from Adobe, and no
-combination is free of AltGr, free inside Adobe and present on every keyboard at
+combination is free of AltGr, free inside Adobe, and present on every keyboard at
 once. Set your own in tray → Shortcuts; the editor tells you what each one would
 cost you on *your* keyboard. See [Shortcuts](#shortcuts).
 
@@ -40,7 +40,7 @@ cost you on *your* keyboard. See [Shortcuts](#shortcuts).
 - [Command line](#command-line)
 - [Settings](#settings)
 - [Diagnostics, and what to send with a bug report](#diagnostics-and-what-to-send-with-a-bug-report)
-- [Colour-critical work](#colour-critical-work)
+- [Color-critical work](#color-critical-work)
 - [How it works](#how-it-works)
 - [Rendering](#rendering)
 - [Architecture](#architecture)
@@ -51,7 +51,7 @@ cost you on *your* keyboard. See [Shortcuts](#shortcuts).
 - [Distributing it](#distributing-it)
 - [Safety check](#safety-check)
 - [Still worth doing by hand](#still-worth-doing-by-hand)
-- [Licence](#licence)
+- [License](#license)
 - [Files](#files)
 
 ---
@@ -59,23 +59,23 @@ cost you on *your* keyboard. See [Shortcuts](#shortcuts).
 ## What it does
 
 <p align="center">
-  <img src="docs/dimming.png" alt="InDesign with the same document twice: on the left the page is white, on the right it is grey, with the toolbars, panels and rulers identical in both" width="900">
+  <img src="docs/dimming.png" alt="InDesign with the same document twice: on the left the page is white, on the right it is gray, with the toolbars, panels, and rulers identical in both" width="900">
 </p>
 
 The same InDesign document, a keystroke apart. The page goes from 255 to 204;
-the toolbar, the panels, the rulers, the pasteboard and the rest of the desktop
+the toolbar, the panels, the rulers, the pasteboard, and the rest of the desktop
 are pixel-identical. That is the whole product: the dimming is applied to the
 document viewport and to nothing else.
 
 204 is not an approximation. The Strength window in that screenshot reads
 `20% (k = 0.80)` and `255 (pure white) now displays as 204.`, and sampling the
 page in both images gives 254.8 and 204.2 — a measured ratio of 0.802 against a
-stated 0.800. The same measurement across all five products gives 0.802, 0.809
-and 0.803 for InDesign, Acrobat and InCopy; Illustrator reads lower only because
+stated 0.800. The same measurement across all five products gives 0.802, 0.809,
+and 0.803 for InDesign, Acrobat, and InCopy; Illustrator reads lower only because
 the two captures are not scrolled to the same pixel.
 
 <p align="center">
-  <img src="docs/products.jpg" alt="Illustrator, Photoshop, Acrobat and InCopy, each shown switched off and switched on" width="820">
+  <img src="docs/products.jpg" alt="Illustrator, Photoshop, Acrobat, and InCopy, each shown switched off and switched on" width="820">
 </p>
 
 ## What it looks like
@@ -200,7 +200,7 @@ five overlays live at the same time.
 | Photoshop | 2026 (27.9) | Supported, **off by default** | **Tested** — verify 13/13, canvas 141.02 → 63.53, ratio **0.450**. See [Photoshop](#photoshop--off-by-default-on-purpose) for why the default is off |
 | Acrobat | 26.1.21771.0 | Supported | **Tested** — verify 14/14, canvas 207.02 → 93.98, ratio **0.454** |
 | InDesign / Illustrator / Photoshop / InCopy / Acrobat, other years | — | Expected | **Structurally expected** — there is no version whitelist; see [Future Adobe versions](#future-adobe-versions). Partly demonstrated: Illustrator **28.7.10** (2024, two majors older than the version above) resolved its viewport unchanged and the overlay landed exactly on the canvas rectangle — 7 structural checks, 0 failures. The photometric half was not taken, because Adobe's own “an older version is installed” dialog was sitting over the canvas and the verifier refuses to measure through an obstruction |
-| After Effects, Premiere Pro, Media Encoder | — | Unsupported | Deliberate. The viewport is video, usually dark, and colour-critical. Dimming it is the wrong tool |
+| After Effects, Premiere Pro, Media Encoder | — | Unsupported | Deliberate. The viewport is video, usually dark, and color-critical. Dimming it is the wrong tool |
 | Audition | — | Unsupported | No page-like viewport |
 | Bridge | — | Unsupported | A thumbnail grid on a dark ground; nothing white to dim |
 | Lightroom Classic, Animate, Dreamweaver, XD | — | Not investigated | Not installed on the machine this was built on. Saying anything about them would be guessing |
@@ -232,13 +232,13 @@ work". The two are kept apart everywhere in this document.
 **The Windows floor is Windows 10 version 21H2 (build 19044)**, chosen because
 that is the oldest Windows on which Adobe supports the applications this
 attaches to. Every API used is present from there on, including
-`WDA_EXCLUDEFROMCAPTURE` (needs 19041). The DPI, monitor and cloaking APIs are
+`WDA_EXCLUDEFROMCAPTURE` (needs 19041). The DPI, monitor, and cloaking APIs are
 all reached through a fallback cascade, so an older Windows degrades rather than
 crashes — but that is a property of the code, not a tested claim.
 
 ### Future Adobe versions
 
-There is no version table anywhere in the source. A product is recognised by
+There is no version table anywhere in the source. A product is recognized by
 **process name plus frame window class**, and then the structure is *validated*:
 
     Illustrator.exe running
@@ -260,7 +260,7 @@ whitelist and capability detection: the failure is diagnosable without a rebuild
 ## The tray menu
 
 ```
-Abode Night View 1.4.0            <- click for About
+Abode Night View 1.4.1            <- click for About
 ──────────────────────────
 ✓ Enabled                          <- reads "Disabled", unticked, when off
 ✓ Schedule (20:00 – 07:00)  >      <- reads "(off)" when there is no schedule
@@ -319,7 +319,7 @@ There are four distinct answers to "why is nothing dimmed", and they used to be
 one silence: not running, running and unreadable, running with no document open,
 and attached. The middle two are told apart structurally rather than guessed at
 — an application whose own window framework is present but has no document view
-in it has no document open; one with no recognisable framework at all is a
+in it has no document open; one with no recognizable framework at all is a
 version whose windows have been rearranged. A splash screen is filtered out by
 shape, so a slow launch is never reported as an unsupported version.
 
@@ -356,7 +356,7 @@ alone was ambiguous — a lone "Enabled" reads equally as a label and as a butto
 
 The Strength window puts the setting above the slider and its consequence below
 it: `20% (k = 0.80)` over the control, and `255 (pure white) now displays as
-204.` under it, in grey. The percentage is what you chose and k is what the
+204.` under it, in gray. The percentage is what you chose and k is what the
 compositor multiplies by — one fact in two units, so they stay on one line; the
 sentence underneath is the only part you can check by looking at the screen, so
 it sits next to the thing that changes it. All three used to be pipe-separated
@@ -381,7 +381,7 @@ indistinguishable from broken:
 | ------------------------------------------------- | --------------------- |
 | nothing selected is running                       | `no target`           |
 | running, and this build cannot read its windows   | `unsupported version` |
-| running and readable, but minimised or off-screen | `nothing to dim`      |
+| running and readable, but minimized or off-screen | `nothing to dim`      |
 | running, and showing no document                  | *nothing*             |
 
 **An application with no document open is not reported.** It is the most
@@ -435,7 +435,7 @@ the taskbar without hovering over anything at all.
 The two resolve through one function, because a notification arriving in a
 different face from the icon that raised it is the same class of contradiction
 as a tooltip disagreeing with its own menu. The pair carries 16, 20, 24, 32, 48,
-64 and 96 px: a balloon asks at `SM_CXICON` and a notification area at
+64, and 96 px: a balloon asks at `SM_CXICON` and a notification area at
 `SM_CXSMICON`, and an `.ico` whose smallest entry is 32 px is a tray icon the
 shell has to halve — which is how a two-pixel sunglasses bar stops being
 legible. The release build reads those sizes back out of the generated
@@ -464,7 +464,7 @@ in `Audit.exe --selftest`.
 
 The top line opens **About**: the version read out of the binary's own version
 resource, who wrote it, a link to the repository, and the GNU GPL notice with
-the licence linked. The icon there is *painted* rather than converted, because
+the license linked. The icon there is *painted* rather than converted, because
 `Icon.ToBitmap()` cannot read a PNG-compressed `.ico` entry — it walks the
 payload as though it were a device-independent bitmap and returns noise, which
 is exactly what the About box showed for two releases. `Graphics.DrawIcon` goes
@@ -505,7 +505,7 @@ hand at 01:00 and it stays off until 07:00 — a schedule that re-asserted itsel
 every quarter second would make the tray item look broken for half the night.
 
 **The clock can move.** Daylight saving, a manual correction, a laptop waking up
-and resynchronising with a time server: each of those is a boundary that has
+and resynchronizing with a time server: each of those is a boundary that has
 silently gone past. `SystemEvents.TimeChanged` re-evaluates rather than waiting
 for the next one.
 
@@ -566,7 +566,7 @@ gets the older, general warning — a copy passed to someone on another layout i
 the case the first check cannot see.
 
 **Upgrading from 1.2 removes the four old defaults.** `Ctrl+Alt+N`,
-`Ctrl+Alt+Up`, `Ctrl+Alt+Down` and `Ctrl+Alt+Q` are deleted from an existing
+`Ctrl+Alt+Up`, `Ctrl+Alt+Down`, and `Ctrl+Alt+Q` are deleted from an existing
 settings file **only where they are still exactly what 1.2 wrote** — those were
 never a choice. A combination you set yourself is left alone, including
 `Ctrl+Alt+N` if you deliberately bind it back. The notification at launch says
@@ -606,7 +606,7 @@ Product ids: `indesign`, `illustrator`, `incopy`, `photoshop`, `acrobat`.
 pasted into a bug report, and it comes back through whatever codepage the
 reporter's console happens to be set to:
 
-    Abode Night View 1.4.0 | x64 | .NET Framework 4.0.30319.42000 | Windows 10.0.26200
+    Abode Night View 1.4.1 | x64 | .NET Framework 4.0.30319.42000 | Windows 10.0.26200
 
 **Output from the diagnostic subcommands can look empty from PowerShell.** This
 is a GUI-subsystem binary, so double-clicking it never flashes a console — and
@@ -687,7 +687,7 @@ ever selectable.
 
 writes `AbodeNightView-diagnostics.txt`: Windows build, DPI awareness actually
 applied, which optional APIs this machine has, every monitor with its rectangle
-and scaling, every recognised Adobe application with its version and resolved
+and scaling, every recognized Adobe application with its version and resolved
 viewports, the live overlay slots, and the settings as loaded. No document
 names, no file contents, no window titles other than the application frames.
 
@@ -713,16 +713,16 @@ saw instead:
 
 ---
 
-## Colour-critical work
+## Color-critical work
 
-**Disable Abode Night View for colour-critical visual judgement.**
+**Disable Abode Night View for color-critical visual judgment.**
 
 It changes nothing in your document and nothing in an export. It does change what
-you see: a neutral multiply of every pixel inside the viewport. Tone, contrast
+you see: a neutral multiply of every pixel inside the viewport. Tone, contrast,
 and apparent saturation are all affected. Switch it off — tray → Enabled, or a
-shortcut of your own — before you judge a colour, a proof, or a black point.
+shortcut of your own — before you judge a color, a proof, or a black point.
 
-It is a comfort filter, not a colour-management tool, and it does not pretend to
+It is a comfort filter, not a color-management tool, and it does not pretend to
 be one.
 
 ---
@@ -737,7 +737,7 @@ The overlay is a black window with `WS_EX_LAYERED` and
         = dst · k                 where k = 1 − α
 
 A black source turns alpha blending into an exact per-channel multiply, computed
-by the compositor, with no screen capture, no duplicated rendering and no added
+by the compositor, with no screen capture, no duplicated rendering, and no added
 latency. 55 % strength is k = 0.45.
 
 **Measured, not assumed.** `Transfer.exe` recovers the per-level curve from a
@@ -791,7 +791,7 @@ program can do to a pixel:
     out = src·a + dst·(1-a)      DWM source-over, in sRGB-encoded values
     src = black                  so out = dst·k,  k = 1-a
 
-A per-channel multiply by a single constant. Hue, saturation and relative
+A per-channel multiply by a single constant. Hue, saturation, and relative
 contrast are all preserved; only the level moves. No capture, no second render
 path, no frame of latency — DWM composites the overlay with the target window in
 the same frame it was already going to draw.
@@ -805,12 +805,12 @@ design decision, not a to-do list: none of them is "coming soon".
 | mode | why it is not shipped |
 |---|---|
 | **Warm** | Removed in 1.2.0. It was cheap, deterministic and did the wrong thing — see below |
-| **Greyscale** | The only route that does not capture the screen did not perform the channel mixing it was asked for, and needs an unsynchronised refresh timer |
+| **Greyscale** | The only route that does not capture the screen did not perform the channel mixing it was asked for, and needs an unsynchronized refresh timer |
 | **Shader** | A correct tone curve needs capture plus GPU processing, and therefore a frame of latency by construction |
 
 #### Why Warm was removed
 
-Warm set the overlay to an amber source colour instead of black. Measured against
+Warm set the overlay to an amber source color instead of black. Measured against
 Illustrator's canvas at strength 35 with the default tint, the whole transform is
 visible in three numbers — the canvas read 96/96/96 undimmed and **83/70/62**
 with Warm on, against a prediction of 83.4/70.8/62.4. So it is exactly what the
@@ -832,7 +832,7 @@ Three consequences, all measured:
 - **It lifts the black floor.** Break-even for red is at level 60: every pixel
   darker than that comes out *brighter* than it started. The measured ruler strip
   went 59.6 → 60.1 in red. Black artwork and Adobe's own dark interface turn a
-  dull red, which on a layout tool is a colour-fidelity problem rather than a
+  dull red, which on a layout tool is a color-fidelity problem rather than a
   matter of taste.
 
 It was kept for a while behind the label "Warm (approximate)". "Approximate"
@@ -843,7 +843,7 @@ caveat, it is a different feature. Removed.
 
 The one Windows primitive that could produce grayscale *without* capturing and
 redrawing the viewport is the Magnification API's `MagSetColorEffect`, a
-documented 5×5 colour matrix applied by a `WC_MAGNIFIER` control at 1.0×.
+documented 5×5 color matrix applied by a `WC_MAGNIFIER` control at 1.0×.
 Prototype C implements exactly that. Measured on this machine:
 
 - **1.0× magnification does not resample.** An identity matrix produced a copy
@@ -854,7 +854,7 @@ Prototype C implements exactly that. Measured on this machine:
   matrix inverted correctly.
 - **Channel mixing did not happen.** A pure Rec.709 grayscale matrix behaved as a
   *neutral* gain of k, with saturation fully preserved and simply scaled by k.
-  Every result was consistent with the implementation collapsing each colour
+  Every result was consistent with the implementation collapsing each color
   column to its sum and applying it as a per-channel gain.
 
 So the primitive does not do the one thing Greyscale needs. That is a measured
@@ -865,7 +865,7 @@ API can never do it.
 There is a second, independent reason. Even where it works, the magnifier is a
 **capture-and-redraw** path: there is no "the source repainted" notification, so
 the copy is refreshed on a timer, measured at 36–38 refreshes/s against a 16 ms
-timer, unsynchronised with the window underneath. Neutral has no such term — DWM
+timer, unsynchronized with the window underneath. Neutral has no such term — DWM
 composites the overlay with the target in the same frame. A filter that trails
 the canvas while you scroll is worse than a mathematically imperfect one that
 does not.
@@ -873,7 +873,7 @@ does not.
 #### Why Shader is not shipped
 
 The highlight-compression curve is not affine, and neither alpha blending nor a
-colour matrix can express it. The options that can:
+color matrix can express it. The options that can:
 
 | approach | why not |
 |---|---|
@@ -977,7 +977,7 @@ every sync. Three separate faults are corrected:
    with it, and the dimming then silently stops. Regression-tested: reproduced
    deterministically, recovery measured at 59–185 ms single-target and 135–250 ms
    with several targets tracked, over four consecutive runs.
-2. **A foreign window sandwiched between overlay and owner.** With two maximised
+2. **A foreign window sandwiched between overlay and owner.** With two maximized
    Adobe applications on one monitor, InDesign's overlay can be left above
    Illustrator's frame — legitimately above *its own* owner the whole time — and
    Illustrator's canvas is then dimmed twice. Measured before the fix:
@@ -1003,7 +1003,7 @@ appears in Alt+Tab or the taskbar.
 
 ### Tracking
 
-One global WinEvent hook (foreground, move/size, minimise) plus **one per tracked
+One global WinEvent hook (foreground, move/size, minimize) plus **one per tracked
 process**, added and removed as applications start and quit. A process-scoped
 hook dies with the process it was created for, so it is re-armed — without that,
 quitting and restarting an Adobe application silently dropped tracking back to
@@ -1023,7 +1023,7 @@ dialog fixes it instantly, and the overlay is click-through so the dialog is
 fully usable meanwhile. Not fixed, because the fix is the adjacency rule already
 measured as a flicker cause.
 
-**Illustrator, Photoshop and InCopy dim their rulers along with the canvas.**
+**Illustrator, Photoshop, and InCopy dim their rulers along with the canvas.**
 Their canvas child window starts at the document origin and the rulers are
 painted inside it, so there is no rectangle to exclude — see
 [Rulers](#rulers) for the measurements and for why a fixed inset was rejected.
@@ -1093,7 +1093,7 @@ the baseline with the overlay already on, and if something is covering the canva
 ```
 
 logs every transition with a duration, and reports count / median / p95 / p99 /
-max plus how many exceeded the frame budget at 30, 60, 120 and 144 Hz. Idle with
+max plus how many exceeded the frame budget at 30, 60, 120, and 144 Hz. Idle with
 four applications tracked: **0 transitions, 0 undimmed intervals.**
 
 Development-tree tools:
@@ -1103,14 +1103,14 @@ Development-tree tools:
 .\Audit.exe --selftest    # 310 checks: hotkeys, settings, migration, adapters,
                           #   the schedule, the notification, restart state,
                           #   dialog layout, text measurement, text spacing,
-                          #   and the licence notice
+                          #   and the license notice
 .\ProtoA.exe dump --proc=Illustrator
 .\Transfer.exe off.png on.png
 ```
 
 `Audit.exe` deliberately does not depend on Adobe. It builds its own windows —
 including synthetic frames with real `OWL.Document` hierarchies — so geometry,
-photometry, ownership, input transparency, lifecycle and the whole multi-target
+photometry, ownership, input transparency, lifecycle, and the whole multi-target
 state machine are measured on demand rather than when the canvas happens to be
 unobstructed.
 
@@ -1130,7 +1130,7 @@ taken on a machine that was also running a game, so treat them as an upper
 bound rather than a floor.
 
 Tracking is event-driven; the 250 ms timer is a safety net, not the mechanism.
-There is no capture, no swap chain and no per-frame work — the overlays are
+There is no capture, no swap chain, and no per-frame work — the overlays are
 ordinary layered windows and their cost is a blend DWM was already doing.
 
 ---
@@ -1162,7 +1162,7 @@ the end identifies the binary that shipped.
 
 **A clean checkout builds.** No binary is tracked: the `.ico` files are generated
 from `assets\*.png` by `tools\make-icon.ps1` on the first build, and the `.exe`
-files, the reports and the settings file are all ignored. Nothing in the
+files, the reports, and the settings file are all ignored. Nothing in the
 repository is a build output except the words describing one.
 
 ---
@@ -1201,7 +1201,7 @@ If you want to satisfy yourself before running it on a machine with unsaved work
   windows. It never sends a message to an Adobe window, never posts input to
   one, never scripts one, and never opens a document.
 
-The whole Win32 surface is about 50 imports, all documented window, DPI, monitor
+The whole Win32 surface is about 50 imports, all documented window, DPI, monitor,
 and DWM functions. `--diagnostics` lists which of them this machine actually has.
 
 ---
@@ -1215,7 +1215,7 @@ measurement — a person looked at the screen and reported what they saw:
 
 - multi-Adobe targeting behaves as expected across the four applications open at
   once;
-- the tray state and menu behaviour were inspected;
+- the tray state and menu behavior were inspected;
 - **125 % display scaling showed no visible defect.**
 
 Still outstanding:
@@ -1234,14 +1234,14 @@ Still outstanding:
 
 ---
 
-## Licence
+## License
 
 **GNU General Public License, version 3 or later** (`GPL-3.0-or-later`). The full
 text is in [LICENSE](LICENSE); every source file carries an SPDX header; the
-About box shows the notice with the licence linked, which is the form the GPL
+About box shows the notice with the license linked, which is the form the GPL
 itself asks for.
 
-In short, and without replacing the text: you may use it, read it, change it and
+In short, and without replacing the text: you may use it, read it, change it, and
 pass it on, and anything you pass on carries the same freedoms and the same
 source. It comes with **no warranty**, which is not boilerplate here — this is a
 utility that draws over other programs' windows, and the [Safety
@@ -1271,7 +1271,7 @@ src/
   AbodeNightView.cs       overlay window, controller, tray, entry point
   Settings.cs             portable-first .ini, migration from Night View 1.0
   ProductPrefs.cs         what the settings say about one product
-  UiState.cs              tray text, mode normalization, About and the licence
+  UiState.cs              tray text, mode normalization, About and the license
                           notice – pure functions
   Schedule.cs             wall-clock range arithmetic – pure functions
   Balloon.cs              the notification, and the artwork on it

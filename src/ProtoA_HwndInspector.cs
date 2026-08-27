@@ -264,8 +264,8 @@ internal static class ProtoA
         long clientArea = (long)client.W * client.H;
         if (clientArea <= 0) { P("!! main window has no client area (minimized?) - restore it and re-run"); return; }
 
-        POINT centre = new POINT(client.Left + client.W / 2, client.Top + client.H / 2);
-        P("client centre point       : {0},{1}", centre.X, centre.Y);
+        POINT center = new POINT(client.Left + client.W / 2, client.Top + client.H / 2);
+        P("client center point       : {0},{1}", center.X, center.Y);
         P("");
 
         var cands =
@@ -273,15 +273,15 @@ internal static class ProtoA
             .Select(n => new {
                 N = n,
                 Frac = (double)n.Area / clientArea,
-                Covers = n.R.Left <= centre.X && n.R.Right >= centre.X &&
-                         n.R.Top <= centre.Y && n.R.Bottom >= centre.Y,
+                Covers = n.R.Left <= center.X && n.R.Right >= center.X &&
+                         n.R.Top <= center.Y && n.R.Bottom >= center.Y,
                 Scroll = (n.St & 0x00300000L) != 0
             })
             .Where(x => x.Frac >= 0.05 && x.Frac <= 1.05)
             .OrderByDescending(x => (x.Covers ? 1000 : 0) + (x.Scroll ? 500 : 0) + x.Frac * 100)
             .Take(25).ToList();
 
-        P("{0,-11} {1,-30} {2,-24} {3,7} {4,7} {5,7}", "HWND", "CLASS", "RECT", "%CLIENT", "CENTRE", "SCROLL");
+        P("{0,-11} {1,-30} {2,-24} {3,7} {4,7} {5,7}", "HWND", "CLASS", "RECT", "%CLIENT", "CENTER", "SCROLL");
         foreach (var c in cands)
             P("{0,-11} {1,-30} {2} {3,6:P1} {4,7} {5,7}  '{6}'",
                 Hx(c.N.H), c.N.Class, c.N.R, c.Frac, c.Covers ? "yes" : "-", c.Scroll ? "yes" : "-", Trunc(c.N.Text, 30));

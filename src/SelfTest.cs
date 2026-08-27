@@ -214,7 +214,7 @@ internal static class SelfTest
 
         // The editor is only ever reached by clicking a tray menu item, so a
         // constructor or layout fault in it would never show up in any other test.
-        // Build it, realise its handle, lay it out, and take it down again.
+        // Build it, realize its handle, lay it out, and take it down again.
         try
         {
             var mgr3 = new HotkeyManager(id => { });
@@ -1131,7 +1131,7 @@ internal static class SelfTest
             Check(ProductPrefs.Enabled(indesign) == indesign.DefaultEnabled,
                   "corrupt: a non-boolean product toggle falls back to its default", null);
             Check(ProductPrefs.RegionOf(indesign) == Region.Canvas,
-                  "corrupt: an unrecognised region falls back to the adapter's default",
+                  "corrupt: an unrecognized region falls back to the adapter's default",
                   ProductPrefs.RegionOf(indesign));
 
             // --- a file written by a version that does not exist yet ---------
@@ -1205,7 +1205,7 @@ internal static class SelfTest
         var plain = new ContextMenuStrip();
         plain.ShowCheckMargin = false; plain.ShowImageMargin = false;
         Check(!TrayMenuStyle.CanDrawChecks(plain),
-              "and the styling the bug came from is still recognised as broken", null);
+              "and the styling the bug came from is still recognized as broken", null);
 
         var item = new ToolStripMenuItem(TrayState.EnabledText(true));
         item.Checked = true;
@@ -1268,7 +1268,7 @@ internal static class SelfTest
         // What the hover says INSTEAD has since changed -- see below -- so the
         // assertion is on the contradiction, not on the replacement wording.
         // ------------------------------------------------------------------
-        string menuRow = TrayState.Labelled("Photoshop 2026", "no document open");
+        string menuRow = TrayState.Labeled("Photoshop 2026", "no document open");
         string hover   = TrayState.Tooltip(true, 55, 0, 1, 1, 0);
 
         Check(!hover.Contains("no target"),
@@ -1403,7 +1403,7 @@ internal static class SelfTest
         Check(Modes.Normalize("  NEUTRAL  ") == Modes.Neutral,
               "and a real mode survives whitespace and case", null);
         Check(Modes.WasRetired("greyscale") && Modes.WasRetired("shader"),
-              "the removed modes are still recognised as former modes", null);
+              "the removed modes are still recognized as former modes", null);
         Check(!Modes.WasRetired("hyperspectral"),
               "and something that never existed is not", null);
         Check(Modes.Supported.Length == 1 && Modes.Supported[0] == Modes.Neutral,
@@ -1487,18 +1487,18 @@ internal static class SelfTest
         // from a name with the ragged whitespace Adobe's own version resource
         // actually contains.
         string name = AdobeTarget.Shorten(TargetRegistry.Squeeze("Adobe Photoshop 2026 "));
-        lines.Add(TrayState.Labelled(name, "no document open"));
-        lines.Add(TrayState.Labelled(name, "unsupported version"));
-        lines.Add(TrayState.Labelled(name, "unsupported version, cannot attach"));
-        lines.Add(TrayState.Labelled(name, (string)null));
-        lines.Add(TrayState.Labelled(name, "2 windows", "no document open"));
-        lines.Add(TrayState.Labelled(name, null, "no document open"));
-        lines.Add(TrayState.Labelled(name, "2 windows", null));
+        lines.Add(TrayState.Labeled(name, "no document open"));
+        lines.Add(TrayState.Labeled(name, "unsupported version"));
+        lines.Add(TrayState.Labeled(name, "unsupported version, cannot attach"));
+        lines.Add(TrayState.Labeled(name, (string)null));
+        lines.Add(TrayState.Labeled(name, "2 windows", "no document open"));
+        lines.Add(TrayState.Labeled(name, null, "no document open"));
+        lines.Add(TrayState.Labeled(name, "2 windows", null));
         foreach (var t in TargetRegistry.All)
         {
-            lines.Add(TrayState.Labelled(t.ShortName, TargetRegistry.Explain(TargetStatus.NoDocument)));
-            lines.Add(TrayState.Labelled(t.ShortName, TargetRegistry.Explain(TargetStatus.Unsupported)));
-            lines.Add(TrayState.Labelled(t.ShortName, Region.Pretty(t.DefaultRegion)));
+            lines.Add(TrayState.Labeled(t.ShortName, TargetRegistry.Explain(TargetStatus.NoDocument)));
+            lines.Add(TrayState.Labeled(t.ShortName, TargetRegistry.Explain(TargetStatus.Unsupported)));
+            lines.Add(TrayState.Labeled(t.ShortName, Region.Pretty(t.DefaultRegion)));
         }
 
         // The schedule, at every hour of a day, said and unsaid.
@@ -1535,16 +1535,16 @@ internal static class SelfTest
 
         // And the shape the user asked for, stated as itself rather than only
         // as the absence of a fault.
-        Check(TrayState.Labelled("Photoshop 2026", "no document open") ==
+        Check(TrayState.Labeled("Photoshop 2026", "no document open") ==
               "Photoshop 2026 (no document open)",
               "a product row reads \"Photoshop 2026 (no document open)\"",
-              TrayState.Labelled("Photoshop 2026", "no document open"));
-        Check(TrayState.Labelled("Photoshop 2026", "2 windows", "no document open") ==
+              TrayState.Labeled("Photoshop 2026", "no document open"));
+        Check(TrayState.Labeled("Photoshop 2026", "2 windows", "no document open") ==
               "Photoshop 2026 (2 windows, no document open)",
               "and two things to say share the one parenthesis",
-              TrayState.Labelled("Photoshop 2026", "2 windows", "no document open"));
-        Check(TrayState.Labelled("Photoshop 2026", (string)null) == "Photoshop 2026" &&
-              TrayState.Labelled("Photoshop 2026", "") == "Photoshop 2026",
+              TrayState.Labeled("Photoshop 2026", "2 windows", "no document open"));
+        Check(TrayState.Labeled("Photoshop 2026", (string)null) == "Photoshop 2026" &&
+              TrayState.Labeled("Photoshop 2026", "") == "Photoshop 2026",
               "and nothing to say leaves an empty parenthesis off entirely", null);
         Check(TrayState.ScheduleItem(true, "20:00 – 07:00") == "Schedule (20:00 – 07:00)" &&
               TrayState.ScheduleItem(false, "20:00 – 07:00") == "Schedule (off)",
@@ -1637,21 +1637,21 @@ internal static class SelfTest
               "the author's name appears in the attribution, so it can be linked there",
               AboutInfo.Attribution);
 
-        // ---------------------------------------------------------- licence
+        // ---------------------------------------------------------- license
 
         Check(AboutInfo.LicenseId == "GPL-3.0-or-later",
-              "the licence is stated as an SPDX identifier", AboutInfo.LicenseId);
+              "the license is stated as an SPDX identifier", AboutInfo.LicenseId);
         Check(AboutInfo.License.Length == 3,
               "the notice is the GPL's own three paragraphs", AboutInfo.License.Length + " paragraph(s)");
         Check(AboutInfo.License[0].Contains("free software") &&
               AboutInfo.License[0].Contains("GNU General Public License") &&
               AboutInfo.License[0].Contains("version 3 of the License") &&
               AboutInfo.License[0].Contains("any later version"),
-              "the grant names the licence, version 3, and the or-later option", null);
+              "the grant names the license, version 3, and the or-later option", null);
         Check(AboutInfo.License[1].Contains("WITHOUT ANY WARRANTY") &&
               AboutInfo.License[1].Contains("MERCHANTABILITY") &&
               AboutInfo.License[1].Contains("FITNESS FOR A PARTICULAR PURPOSE"),
-              "the disclaimer is intact and still in capitals, as the licence prints it", null);
+              "the disclaimer is intact and still in capitals, as the license prints it", null);
         Check(AboutInfo.License[2].Contains("You should have received a copy") &&
               AboutInfo.License[2].Contains(AboutInfo.LicenseUrl),
               "and the last paragraph carries the address the dialog makes clickable", null);
@@ -1660,7 +1660,7 @@ internal static class SelfTest
             Check(body.Contains(para), "it is all in what the dialog says",
                   para.Substring(0, Math.Min(40, para.Length)) + "...");
 
-        // The whole point of a notice is that it is the licence's wording and
+        // The whole point of a notice is that it is the license's wording and
         // not a summary of it. A stray double space is how a paste turns into a
         // retype, and it is what the rest of this release went looking for.
         string joined = string.Join(" ", AboutInfo.License);
@@ -1673,7 +1673,7 @@ internal static class SelfTest
         {
             string text = File.ReadAllText(copying);
             Check(text.Contains("GNU GENERAL PUBLIC LICENSE") && text.Contains("Version 3"),
-                  "and the full licence text ships beside the binary",
+                  "and the full license text ships beside the binary",
                   text.Length.ToString(CultureInfo.InvariantCulture) + " bytes");
         }
         else

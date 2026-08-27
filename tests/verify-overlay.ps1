@@ -14,7 +14,7 @@
 #    1. InDesign is running and its canvas HWND resolves
 #    2. The overlay window exists with the correct extended styles
 #    3. The overlay rect matches the canvas rect
-#    4. WindowFromPoint at the overlay centre returns INDESIGN, not the overlay
+#    4. WindowFromPoint at the overlay center returns INDESIGN, not the overlay
 #       (this is the click-through test - if it fails, input is being stolen)
 #    5. Screen luminance inside the canvas drops by the expected factor
 #    6. Screen luminance OUTSIDE the canvas is unchanged
@@ -163,7 +163,7 @@ if ($overlay) {
     $cx = $orc.L + [int](($orc.R-$orc.L)/2)
     $cy = $orc.T + [int](($orc.B-$orc.T)/2)
     $hit = [NV]::WindowFromPoint((New-Object Drawing.Point $cx,$cy))
-    Check "WindowFromPoint at the overlay centre reaches InDesign" ($hit -ne $overlay) `
+    Check "WindowFromPoint at the overlay center reaches InDesign" ($hit -ne $overlay) `
         ("({0},{1}) -> 0x{2:X} '{3}'" -f $cx,$cy,$hit.ToInt64(),[NV]::Cls($hit))
     $hitPid = 0; [void][NV]::GetWindowThreadProcessId($hit,[ref]$hitPid)
     Check "the window under the overlay belongs to InDesign" ($hitPid -eq $idp.Id) ("pid=$hitPid, InDesign pid=$($idp.Id)")

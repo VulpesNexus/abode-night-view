@@ -10,7 +10,7 @@ the product **Abode Night View**. Phase 4 (section 14) is the release pass for
 Sections 0–12 are phases 1 and 2 and are left as written, which is why they call
 the product "Night View" — that was its name at the time, and rewriting an
 engineering log to match a later decision makes it useless as a record. Where a
-name, a number or a conclusion has changed since, the current one is in section
+name, a number, or a conclusion has changed since, the current one is in section
 13 or 14.
 
 ---
@@ -25,7 +25,7 @@ Seven things are now settled, most of them by measurement rather than by reading
    No pixel coordinates need to be hard-coded and no InDesign plugin is needed.
 
 2. **`MAGCOLOREFFECT` cannot do a non-linear curve.** This is not a suspicion —
-   Microsoft's own GDI+ page defines the 5×5 colour matrix as *"a linear
+   Microsoft's own GDI+ page defines the 5×5 color matrix as *"a linear
    transformation followed by a translation … called an **affine**
    transformation."* Affine means `out = a·in + b` and nothing else.
 
@@ -81,7 +81,7 @@ is not implemented and is not needed.
 | Approach | Document writes | True dimming | Non-linear curve | Added latency | Complexity | Main risks |
 |---|---|---|---|---|---|---|
 | **Transparent black overlay** (Proto B) | **None** | **Yes — exactly `out = dst·k`** | No | **Zero** (same compositor frame) | **Low** (~450 LOC) | Geometry tracking lags a window drag by a frame or two; no per-channel gain; overlay must be z-ordered, not topmost |
-| **Magnification API + colour matrix** (Proto C) | **None** | Yes | **No — affine only, confirmed** | ≥1 frame; content is re-composited | Medium | Recursion when the host covers its own source; requires a ~16 ms polling timer forever; x64 only (WOW64 unsupported); possible resampling softness at 1.0× |
+| **Magnification API + color matrix** (Proto C) | **None** | Yes | **No — affine only, confirmed** | ≥1 frame; content is re-composited | Medium | Recursion when the host covers its own source; requires a ~16 ms polling timer forever; x64 only (WOW64 unsupported); possible resampling softness at 1.0× |
 | **Desktop Duplication + pixel shader** | **None** | Yes | **Yes** | 1–2 frames | High | Ghosting/tearing during fast scroll; must handle `DXGI_ERROR_ACCESS_LOST`; one duplication per output per process; ~1 GPU pass per frame |
 | **Windows Graphics Capture + shader** | **None** | Yes | Yes | 1–2 frames | High | **Yellow capture border unless the app is MSIX-packaged and the user consents** — see §5.3. Disqualifying as-is |
 | **Composition backdrop brush** | None | — | — | — | — | **Dead end.** `CreateHostBackdropBrush` returns black in a Win32 `DesktopWindowTarget`, is blurred by design, and *"the app cannot read the pixel data back"* |
@@ -159,7 +159,7 @@ all of those produces the whole answer.
 
 ---
 
-## 3. Verified behaviour of Prototype B
+## 3. Verified behavior of Prototype B
 
 Measured with `Verify.exe` against the live InDesign. Read §3.1 before trusting
 this table — it passed in full while the overlay was rendering nothing at all:
@@ -169,7 +169,7 @@ this table — it passed in full while the overlay was rendering nothing at all:
 | Overlay window created | `NightView Overlay`, rect `59,148 2063×1227` |
 | Extended styles | `0x080900A0` = `LAYERED \| TRANSPARENT \| TOOLWINDOW \| NOACTIVATE` |
 | `WS_EX_APPWINDOW` clear | yes — never in Alt+Tab, never on the taskbar |
-| **`WindowFromPoint` at the overlay centre** | returns `0xF114C8 DroverLord - Window Class`, **InDesign's canvas — not the overlay** |
+| **`WindowFromPoint` at the overlay center** | returns `0xF114C8 DroverLord - Window Class`, **InDesign's canvas — not the overlay** |
 | Owning process of that window | InDesign's PID |
 
 That last row is the click-through test, and it passes. The system's own hit
@@ -223,7 +223,7 @@ With the monitors awake, `Verify.exe` against the live InDesign, strength 55:
 | Extended styles | `0x080900A0`, `WS_EX_APPWINDOW` clear |
 | Layered alpha | 140 (55 %), `LWA_ALPHA` |
 | Above the InDesign frame, not topmost | yes |
-| `WindowFromPoint` at the centre | InDesign's canvas, not the overlay |
+| `WindowFromPoint` at the center | InDesign's canvas, not the overlay |
 | InDesign popups above the overlay | 2 of 2 — menus and panels stay undimmed |
 | **Canvas luminance** | **162.81 → 73.26, ratio 0.450** (predicted `k` = 0.451) |
 | **Chrome outside the canvas** | **62.75 → 62.75, ratio 1.000** — untouched |
@@ -270,7 +270,7 @@ multiply can close.
 
 In use, the overlay flashed on almost every click that moved a frame or edited
 text. `Verify.exe --watch` samples the overlay every 8 ms and logs every change
-of visibility, rectangle and z-position, which turned four guesses into four
+of visibility, rectangle, and z-position, which turned four guesses into four
 measurements:
 
 | Cause | Signature in the log |
@@ -302,7 +302,7 @@ answer is to stop chasing: set the InDesign frame as the overlay's **owner**
 (`GWLP_HWNDPARENT`). Windows then maintains "above the owner" as an invariant,
 with no polling and no gap. Ownership is not parenting — it sets the owner of a
 top-level window and does not attach input queues, so it costs nothing in input
-behaviour.
+behavior.
 
 It is also more correct than chasing. Owned windows are ordered among themselves
 by recency, so any popup InDesign raises later automatically lands above the
@@ -321,7 +321,7 @@ call is refused.
 
 ---
 
-## 4. The colour maths
+## 4. The color maths
 
 ### 4.1 What alpha blending gives you
 
@@ -348,7 +348,7 @@ out = dst · (1−α)          →   k = 1 − α
 
 This is your requested first transform, exactly, with black staying black.
 
-**The one thing it cannot do is per-channel gain.** With a non-black tint colour
+**The one thing it cannot do is per-channel gain.** With a non-black tint color
 `c` the result is `out = dst·(1−α) + c·α` — an affine map with a *positive*
 offset. You can *add* to a channel, never *subtract* from it. So "Warm Dim" via
 a tint overlay is uniform dimming plus a warm **lift** (blacks glow faintly
@@ -360,7 +360,7 @@ reducing blue. Prototype C does it properly.
 
 Confirmed convention, from [MAGCOLOREFFECT](https://learn.microsoft.com/en-us/windows/win32/api/magnification/ns-magnification-magcoloreffect)
 which delegates to [Using a Color Matrix to Transform a Single Color](https://learn.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-using-a-color-matrix-to-transform-a-single-color-use):
-the colour is the **row vector `[R G B A 1]` multiplied on the left**, element
+the color is the **row vector `[R G B A 1]` multiplied on the left**, element
 `M[i][j]` is "how much of input channel *i* goes into output channel *j*", **row
 4 holds the additive offsets**, and column 4 must be `(0,0,0,0,1)`. Microsoft's
 own grayscale sample confirms the orientation.
@@ -426,7 +426,7 @@ Anchoring black at black forces `b = 0`, and then white forces `a = 130/255 =
 instead lifts black to 40/255 — exactly the failure mode you ruled out ("black
 text remains dark and legible").
 
-**A 5×5 colour matrix cannot express your curve. Stated clearly, as requested.**
+**A 5×5 color matrix cannot express your curve. Stated clearly, as requested.**
 
 ---
 
@@ -570,7 +570,7 @@ not from memory.
 | Claim | Verdict | Source |
 |---|---|---|
 | `MAGCOLOREFFECT` is `float transform[5][5]` with GDI+ semantics | Confirmed | [MAGCOLOREFFECT](https://learn.microsoft.com/en-us/windows/win32/api/magnification/ns-magnification-magcoloreffect) |
-| The matrix can only express affine transforms | **Confirmed** | [GDI+ colour matrix](https://learn.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-using-a-color-matrix-to-transform-a-single-color-use) — *"a linear transformation followed by a translation is called an affine transformation"* |
+| The matrix can only express affine transforms | **Confirmed** | [GDI+ color matrix](https://learn.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-using-a-color-matrix-to-transform-a-single-color-use) — *"a linear transformation followed by a translation is called an affine transformation"* |
 | The host window must be `WS_EX_LAYERED` | Confirmed | [Magnification API Overview](https://learn.microsoft.com/en-us/windows/win32/winauto/magapi/magapi-intro) — *"The magnifier control must be hosted in a window created with the WS_EX_LAYERED extended style"* |
 | The host should be set fully opaque | Confirmed | same — `SetLayeredWindowAttributes(hwndHost, 0, 255, LWA_ALPHA)` *"to prevent the underlying screen content from showing through"* |
 | `WS_EX_TRANSPARENT` on the host passes clicks through | **Confirmed, explicitly for magnifier hosts** | same — *"mouse clicks are passed to whatever object is behind the host window"* |
@@ -696,7 +696,7 @@ Two verification tools are provided:
 - **`tests/report-indesign-state.jsx`** — a read-only ExtendScript probe. It
   reports `document.modified`, **`document.undoName`** (the label Edit → Undo
   would show — if anything wrote to the DOM, this changes), and the `[Paper]`
-  swatch's exact colour value. Every line is a getter; the only side effect is
+  swatch's exact color value. Every line is a getter; the only side effect is
   an alert.
 
 The `[Paper]` fallback is **not implemented** and there is no setting to enable
@@ -704,7 +704,7 @@ it. Nothing in this codebase can modify a swatch.
 
 ---
 
-## 9. Screen capture behaviour
+## 9. Screen capture behavior
 
 | Capture method | Overlay visible? |
 |---|---|
@@ -804,7 +804,7 @@ If it *is* insufficient, §5.4 (per-output LUT) before §5.2 (shader).
 
 Everything above §11 was written while establishing that the approach works.
 This section is the opposite exercise: an attempt to **disprove** the shipping
-behaviour, and an inventory of where it is actually known to work.
+behavior, and an inventory of where it is actually known to work.
 
 ### 12.1 The harness — why the audit is not "reasoned about"
 
@@ -850,7 +850,7 @@ zNeedsWork = false;        // "ownership handles it"
 ```
 
 so once the overlay sank, there was no path back. The failure is silent and
-total: the dimming simply stops, with no event, no error and nothing in the UI.
+total: the dimming simply stops, with no event, no error, and nothing in the UI.
 
 The fix keeps ownership and adds the check back, with a repair that inserts the
 overlay **directly above the frame** rather than at the top — so anything
@@ -923,7 +923,7 @@ InDesign's GPU Performance setting to change the dimming.
 `0,−497 4000×3017`:
 
 ```
-  centred / full on each of three monitors      exact, 15-17 ms
+  centered / full on each of three monitors      exact, 15-17 ms
   1280x720, 1920x1080, 2560x1440 windows        exact, 15-17 ms
   tiny (160x120), wide-and-thin, tall-and-thin  exact, 15-17 ms
   straddling a vertical monitor edge            exact
@@ -1002,8 +1002,8 @@ when they were not.
 InCopy 21.5.1, Photoshop 27.9, Acrobat 26.1.21771.0, all installed and running.**
 
 Phase 2 hardened one product. This phase asked whether the concept generalises,
-and the answer turned out to be more favourable than expected structurally and
-less favourable than expected semantically.
+and the answer turned out to be more favorable than expected structurally and
+less favorable than expected semantically.
 
 ### 13.1 The structural finding
 
@@ -1054,7 +1054,7 @@ it has survived from Acrobat's oldest builds into 26.1.
 
 ### 13.2 Version policy: no whitelist anywhere
 
-Products are recognised by process name plus frame window class, then the
+Products are recognized by process name plus frame window class, then the
 structure is *validated*. There is no version number in any decision. The
 display name comes from the running executable's `ProductName` version resource:
 
@@ -1072,14 +1072,14 @@ names the step that failed and lists the visible window classes it found
 instead. That is the whole difference between capability detection and a version
 table: the failure is diagnosable without a rebuild.
 
-InCopy is the worked example. It was launched, it was recognised, its frame class
+InCopy is the worked example. It was launched, it was recognized, its frame class
 `incopy` and OWL hierarchy were confirmed — and validation failed cleanly with
 "most likely: no document is open", plus a twelve-line structural summary. That
 is what an unfamiliar future version will look like, and it is legible.
 
 ### 13.3 The defect multi-target support exposed
 
-Two Adobe applications maximised on the same monitor overlap completely. With
+Two Adobe applications maximized on the same monitor overlap completely. With
 Illustrator in front, its canvas measured **k = 0.176 against a requested
 0.451** — while *every structural check passed*: the overlay was on the exact
 rectangle, owned by the right frame, above its owner, click-through, correct
@@ -1136,7 +1136,7 @@ product, canvas region as shipped:
 | Photoshop | 181.81 → 81.77 | 0.450 | 0.451 | 1.000 | 13 / 0 |
 | Acrobat | 180.86 → 81.90 | 0.453 | 0.451 | 1.000 | 13 / 0 |
 
-Four applications, two UI frameworks, one compositor behaviour. The InDesign
+Four applications, two UI frameworks, one compositor behavior. The InDesign
 figures are identical to phase 2's, which is the regression baseline holding.
 
 ### 13.6 Greyscale and Shader — measured, not argued
@@ -1155,7 +1155,7 @@ against InDesign's canvas, with a screen capture and a pixel differ:
 
 The diagonal and the additive row are honoured exactly. Channel mixing is not.
 Every one of the five results is consistent with the implementation collapsing
-each colour column to its sum and applying it as a per-channel gain — affine per
+each color column to its sum and applying it as a per-channel gain — affine per
 channel, no mixing. The one primitive that could have produced grayscale without
 capture did not produce grayscale.
 
@@ -1166,7 +1166,7 @@ since phase 1:
   listed as "unknown" for two phases.
 * **The latency is structural.** There is no source-repainted notification, so
   the host is refreshed on a timer: 36–38 refreshes/s against a 16 ms timer,
-  unsynchronised with the window underneath, 0.1–0.3 % CPU, 68–71 MB. Neutral
+  unsynchronized with the window underneath, 0.1–0.3 % CPU, 68–71 MB. Neutral
   has no such term at all.
 
 Shader mode needs the non-affine curve. `SetDeviceGammaRamp` can express it but
@@ -1181,7 +1181,7 @@ Neutral instead.
 
 Phase 2's lesson was that a test which depends on Adobe being unobstructed is a
 coincidence, not a test. Phase 3 extends that: `Harness.cs` registers real Win32
-classes named `OWL.Dock`, `OWL.TabPane`, `OWL.TabGroup` and `OWL.Document` and
+classes named `OWL.Dock`, `OWL.TabPane`, `OWL.TabGroup`, and `OWL.Document` and
 builds windows in exactly the Adobe shape.
 
 WinForms cannot do this — `NativeWindow` rewrites a requested class name into
@@ -1195,7 +1195,7 @@ which builds a real `OwlTarget`, so the validation being tested is the shipping
 validation and not a stand-in. Twenty mechanical checks cover: one frame one
 overlay, exact canvas rect through the OWL rule, two documents in one frame, a
 second application, moving one frame without disturbing the other, burial and
-repair with several targets tracked, minimise and restore, closing an
+repair with several targets tracked, minimize and restore, closing an
 application, opening a new one afterwards, closing one document of two, every
 target closing, and global OFF.
 
@@ -1231,8 +1231,8 @@ selected or globally off: 0.00 % and 36.7 MB. Tracking is event-driven; the
 
 ## 14. Finalization pass — Abode Night View 1.2.0
 
-Phase 4. No architecture was touched: targeting, discovery, z-order, click-through
-and photometry are byte-for-byte the behaviour phase 3 measured. What changed is
+Phase 4. No architecture was touched: targeting, discovery, z-order, click-through,
+and photometry are byte-for-byte the behavior phase 3 measured. What changed is
 what the program *offers*, and one thing that turned out to be a real bug.
 
 ### 14.1 The reported checkmark bug had two causes, not one
@@ -1260,9 +1260,9 @@ carries the tick as well, so the state is given twice.
 
 ### 14.2 Warm was measured, and then removed
 
-Warm set the overlay's source colour to amber instead of black. Against
+Warm set the overlay's source color to amber instead of black. Against
 Illustrator's canvas at strength 35: undimmed 96/96/96, Warm 83/70/62, predicted
-83.4/70.8/62.4. It is precise, deterministic, composition-native and free.
+83.4/70.8/62.4. It is precise, deterministic, composition-native, and free.
 
 It is also, by the arithmetic it is built on, the wrong thing:
 
@@ -1286,7 +1286,7 @@ submenu offering a single choice is a control that cannot be used.
 Both were already unavailable and shown greyed out with their reason. A greyed-out
 row is a permanent advertisement for something that is not coming; the
 investigation is finished and the answer is no. Removed from the UI, from the
-settings vocabulary and from the source. `ModeBackends` is gone;
+settings vocabulary, and from the source. `ModeBackends` is gone;
 `experiments/ProtoC_MagnifierOverlay.cs` — the rig that produced the answer — is
 kept out of the product tree.
 
@@ -1318,7 +1318,7 @@ with no code involved: hiding them grows the same HWND from `59,148 2063x1227` t
 For the others the only available fix was a fixed inset, rejected because Adobe
 scales the ruler with its own UI Scaling preference, independent of Windows DPI.
 Deriving it from the scrollbar width is a coincidence dressed as geometry.
-Everything else on the option list — pixel-colour detection, screenshot analysis,
+Everything else on the option list — pixel-color detection, screenshot analysis,
 capture-based masking — means reading rendered content, which is the thing
 Neutral exists to avoid. Documented as a cosmetic limitation.
 
@@ -1349,9 +1349,9 @@ Windows 10 21H2+ / Windows 11, x64.
 ### 14.7 Version
 
 1.1.0 → **1.2.0**. Two user-visible features removed and a dialog added, with no
-change to targeting or rendering behaviour: a minor bump, not a patch. The
+change to targeting or rendering behavior: a minor bump, not a patch. The
 version now lives in exactly one place, `AssemblyInfo.cs`, and `Diag.Version`,
-`--version`, the tray header and the About box all read it back out of the built
+`--version`, the tray header, and the About box all read it back out of the built
 binary's own version resource.
 
 ### 14.8 What phase 4 did not settle

@@ -1,4 +1,4 @@
-# Windows Magnification API — measured behaviour
+# Windows Magnification API — measured behavior
 
 Machine: Windows 11 Pro 26200.8457 x64, 2026-08-21.
 Source window: Adobe InDesign 21.5.1 document canvas (`DroverLord - Window Class`,
@@ -29,7 +29,7 @@ after start.
 3. **Channel mixing did not happen.** A pure Rec.709 grayscale matrix behaved as a
    *neutral* gain of k with saturation fully preserved and scaled by k. Every one
    of the five results is consistent with the implementation collapsing each
-   colour column to its sum and applying it as a per-channel gain — which is
+   color column to its sum and applying it as a per-channel gain — which is
    exactly "affine per channel, no mixing".
 
    This is the whole reason Greyscale cannot be built on this API here: the one
@@ -40,7 +40,7 @@ after start.
    refuse to ship the mode, not enough to say the API can never do it.
 
 4. **Recursion is solved by `MagSetWindowFilterList(MW_FILTERMODE_EXCLUDE)`.**
-   Returned TRUE; no mirror artefact in any capture.
+   Returned TRUE; no mirror artifact in any capture.
    `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` also works and additionally
    makes the host invisible to GDI screen capture — which is why the first
    attempt at this measurement read "no change" for every mode.
@@ -51,5 +51,5 @@ after start.
 6. **Latency is structural, not incidental.** There is no "the source repainted"
    notification, so the host is refreshed on a timer. It therefore renders a copy
    that is up to one timer period (measured ~27 ms) behind the window underneath,
-   and is not synchronised to it. The Neutral overlay has no such term: DWM
+   and is not synchronized to it. The Neutral overlay has no such term: DWM
    composites it with the target in the same frame.

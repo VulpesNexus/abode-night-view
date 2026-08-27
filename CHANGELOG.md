@@ -11,11 +11,43 @@ back out of the built binary's own version resource.
 
 ---
 
-## Unreleased
+## 1.4.1
 
-Nothing in the program changed. This is the build and the documents: the first
-day the build ran anywhere but the machine it was written on, and a pass over
-what the repository would say about that machine once it was published.
+Nothing in the program behaves differently. What changed is how it spells
+itself, what its documents say, and where the published binary comes from: this
+is the first release built from its own tag rather than from whatever was
+checked out at the time.
+
+### Changed
+
+- **American spelling throughout** — 190 replacements across 25 files. Most are
+  comments and prose, but a few reach the screen: `--diagnostics` and the
+  Targets menu now say `MINIMIZED`, and `--verify` names the `center` sample.
+  **`Greyscale` is deliberately not among them.** It is the name of a mode that
+  existed in 1.1 and, in lower case, a value that can still be sitting in
+  somebody's settings file: `Modes.Retired` matches it byte for byte, and the
+  release build asserts that `Greyscale (experimental)` is *absent* from the
+  artifact. Respelling the prose would leave the documents naming something the
+  code does not; respelling the assertion would leave it hunting for a string no
+  build has ever contained, which is a test that passes because it can no longer
+  fail. Proper nouns and stored values keep the spelling they were given.
+- **The serial comma**, in 43 lists that were missing it. Lists whose final
+  *and* belongs to a single item — "running and unreadable", "float and dock
+  panels" — are not that kind of list and were left alone, as were the ones that
+  end without a conjunction at all.
+- **`assets/source-icon-cool.png` no longer carries an XMP packet.** Saving it
+  out of Photoshop wrote the editing software and its version, two timestamps
+  carrying a UTC offset, and the document lineage identifiers into the file.
+  None of that is artwork, and all of it would have been published along with
+  the picture. The metadata chunk was cut out of the PNG stream rather than the
+  image being re-encoded, so the pixels are provably untouched rather than
+  probably untouched: 0 of 50,304 differ, and the `.ico` built from it after is
+  byte for byte the one built before. `source-icon.png` never had a packet.
+- Five double hyphens standing in for em dashes, in prose, are em dashes.
+- Six numeric ranges written with a hyphen are en dashes, which is how every
+  other range in these documents is written — `36-38 refreshes/s` in
+  `measurements\` was the same measurement as `36–38 refreshes/s` in
+  FEASIBILITY.md, spelled two ways in two files.
 
 ### Fixed
 
@@ -41,22 +73,6 @@ what the repository would say about that machine once it was published.
   The failure quotes both paths now, too, because the first machine it ever
   failed on is one nobody can log into.
 
-### Changed
-
-- **`assets/source-icon-cool.png` no longer carries an XMP packet.** Saving it
-  out of Photoshop wrote the editing software and its version, two timestamps
-  carrying a UTC offset, and the document lineage identifiers into the file.
-  None of that is artwork, and all of it would have been published along with
-  the picture. The metadata chunk was cut out of the PNG stream rather than the
-  image being re-encoded, so the pixels are provably untouched rather than
-  probably untouched: 0 of 50,304 differ, and the `.ico` built from it after is
-  byte for byte the one built before. `source-icon.png` never had a packet.
-- Five double hyphens standing in for em dashes, in prose, are em dashes.
-- Six numeric ranges written with a hyphen are en dashes, which is how every
-  other range in these documents is written — `36-38 refreshes/s` in
-  `measurements\` was the same measurement as `36–38 refreshes/s` in
-  FEASIBILITY.md, spelled two ways in two files.
-
 ---
 
 ## 1.4.0
@@ -74,7 +90,7 @@ the hover text each say one thing less.
   state. Both now resolve through the same function, and the two `.ico`
   resources are named `state-off` / `state-on` for what they are rather than for
   the one thing that used to read them.
-- The state artwork gained 16, 20 and 24 px entries. It carried nothing below
+- The state artwork gained 16, 20, and 24 px entries. It carried nothing below
   32, which is what a balloon asks for; a notification area asks for
   SM_CXSMICON, and an `.ico` whose smallest entry is 32 px is a tray icon the
   shell has to halve — and halving a two-pixel sunglasses bar is how the on
@@ -82,8 +98,8 @@ the hover text each say one thing less.
   sizes back out of the generated containers rather than trusting the list that
   generated them.
 - **The README shows what the utility does**, rather than only what its windows
-  look like: the same InDesign page white and then grey with the toolbars,
-  panels and rulers pixel-identical either side, and the other four products
+  look like: the same InDesign page white and then gray with the toolbars,
+  panels, and rulers pixel-identical either side, and the other four products
   beside it. Sampling those captures gives 254.8 → 204.2, a ratio of 0.802
   against the 0.800 the Strength window states.
 
@@ -107,13 +123,13 @@ the hover text each say one thing less.
   the most ordinary thing an Adobe application can be doing — sitting on its own
   home screen, between jobs — and where the Targets menu says it about one named
   product among several, the hover was saying it about the desktop as a whole,
-  where it distinguished nothing. `no target`, `unsupported version` and
+  where it distinguished nothing. `no target`, `unsupported version`, and
   `nothing to dim` remain; the fourth case is now silence, which is what
   "nothing is wrong" should look like. A running product this build cannot read
   also now outranks it, where it used to lose to it.
 - **The Strength window puts the setting above the slider and its consequence
   below it**: `20% (k = 0.80)` over the control, `255 (pure white) now displays
-  as 204.` under it, in grey. All three readings used to sit on one line above
+  as 204.` under it, in gray. All three readings used to sit on one line above
   the slider, pipe-separated, which asks the eye to do the splitting; and the
   percentage and k are one fact in two units, so they belong together while the
   sentence about a pixel belongs next to the thing that changes it. "20% dim"
@@ -124,7 +140,7 @@ the hover text each say one thing less.
   the user reads already lives. They were the last two still being formatted at
   the point of display, and therefore the last two no test could read.
 - `--diagnostics` calls its icon rows `window icon` and `state artwork`, and
-  adds `tray icon shows`. The row labelled `tray icon` reported the source the
+  adds `tray icon shows`. The row labeled `tray icon` reported the source the
   tray no longer uses.
 - The release script deletes the generated `.ico` files and lets `build.ps1`
   regenerate them, instead of regenerating them itself with its own copy of the
@@ -153,11 +169,11 @@ First public release.
   arbitrary one since Windows XP SP2, so the notification is raised through
   `Shell_NotifyIcon` directly, with a fall back to the ordinary balloon at every
   step and `--diagnostics` reporting which path was taken.
-- **An About box** with the version, the author, the repository and the GNU GPL
+- **An About box** with the version, the author, the repository, and the GNU GPL
   notice.
 - **Four distinct answers to "why is nothing dimmed"** — not running, running
   and unreadable, running with no document open, attached — told apart
-  structurally rather than guessed at, in the tray menu, the notification and
+  structurally rather than guessed at, in the tray menu, the notification, and
   `--probe`.
 
 ### Changed
@@ -197,7 +213,7 @@ First public release.
   asks the window rather than the cache. `Audit.exe` asserts both directions in
   its lifecycle section.
 - **The hover text and the tray menu contradicted each other.** A Photoshop that
-  was running, selected and showing no document was `Photoshop 2026 (no document
+  was running, selected, and showing no document was `Photoshop 2026 (no document
   open)` in the menu and `no target` on hover, at the same moment, about the same
   program. The two were answering different questions — the menu surveyed the
   desktop, the hover counted attached overlays and called zero of them "no
@@ -241,14 +257,14 @@ the time, so this is what can be established, not a complete record.
 - **Greyscale** and **Shader**, after measurement rather than opinion. Neither
   can be done without capturing the screen, and capture costs a frame of latency
   by construction. See README, *Rejected rendering approaches*.
-- **Warm.** Cheap, deterministic, and it did the wrong thing to colour.
+- **Warm.** Cheap, deterministic, and it did the wrong thing to color.
 
 Neutral is what is left, and it is what the compositor can do for free: a black
 layered window at alpha *a*, composited as `out = src*a + dst*(1-a)`, which for
 a black source is a per-channel multiply by `k = 1-a`.
 
-A settings file naming `greyscale`, `shader` or `warm` still loads: the value is
-normalised to `neutral` and written back, silently, because there is nothing the
+A settings file naming `greyscale`, `shader`, or `warm` still loads: the value is
+normalized to `neutral` and written back, silently, because there is nothing the
 user has to do about it.
 
 ### 1.1.0

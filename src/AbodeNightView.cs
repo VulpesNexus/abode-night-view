@@ -12,7 +12,7 @@
 // ----------------------------------------------------------------------------
 //  What this is
 //      One borderless, click-through, layered window per tracked Adobe document
-//      viewport, filled with a solid colour and blended by DWM.
+//      viewport, filled with a solid color and blended by DWM.
 //
 //      With a BLACK fill this computes, per pixel, in the compositor:
 //
@@ -89,7 +89,7 @@ internal sealed class TintOverlay : Form
 
         // Park it off-screen at 1x1 until Sync() gives it the real rectangle, so
         // there is no black flash at the WinForms default position during startup.
-        // -32000 is the same coordinate Windows itself parks minimised windows at
+        // -32000 is the same coordinate Windows itself parks minimized windows at
         // and is outside every possible virtual desktop, including one whose
         // monitors sit at negative coordinates.
         Bounds = new Rectangle(-32000, -32000, 1, 1);
@@ -380,7 +380,7 @@ internal sealed class AbodeNvContext : ApplicationContext
 
         // A schedule is a statement about the wall clock, and the wall clock
         // moves under us: daylight saving, a manual correction, a laptop waking
-        // up and resynchronising with a time server. Re-evaluate rather than
+        // up and resynchronizing with a time server. Re-evaluate rather than
         // waiting for a boundary that has already silently gone past.
         Microsoft.Win32.SystemEvents.TimeChanged += OnTimeChanged;
 
@@ -407,7 +407,7 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// Black, and only black. A layered window composites as
     /// out = src*a + dst*(1-a), so a black source is a pure per-channel multiply
     /// by k = 1-a: hue, saturation and relative contrast are all preserved and
-    /// only the level moves. Any other source colour turns the same expression
+    /// only the level moves. Any other source color turns the same expression
     /// into "multiply by k, then ADD light", which is what the removed Warm mode
     /// did -- see README "Rejected rendering approaches" for the measurements.
     /// </summary>
@@ -520,7 +520,7 @@ internal sealed class AbodeNvContext : ApplicationContext
     {
         if (_cb == null) _cb = OnWinEvent;
 
-        // System-wide: foreground changes, move/size drags, minimise/restore.
+        // System-wide: foreground changes, move/size drags, minimize/restore.
         // A window being created or destroyed anywhere is how we notice an Adobe
         // application starting or quitting without polling the process list.
         _hooks.Add(Native.SetWinEventHook(
@@ -633,7 +633,7 @@ internal sealed class AbodeNvContext : ApplicationContext
             case Native.EVENT_OBJECT_SHOW:
                 // A window merely appearing never invalidates a still-valid target,
                 // and re-scanning on it is what made editing flicker. But a new
-                // top-level window of a class we recognise IS how a product being
+                // top-level window of a class we recognize IS how a product being
                 // launched, or a second document being tiled, first becomes visible.
                 if (Native.GetParent(hwnd) == IntPtr.Zero) Sync(true);
                 return;
@@ -1022,7 +1022,7 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// window it belongs to?
     ///
     /// "Above my owner" is necessary but not sufficient once more than one Adobe
-    /// application is tracked. Two maximised applications on the same monitor
+    /// application is tracked. Two maximized applications on the same monitor
     /// overlap completely; if InDesign's overlay is left above Illustrator's frame
     /// -- which it will be, because activating Illustrator raises Illustrator but
     /// nothing lowers a stale overlay that is still legitimately above ITS owner --
@@ -1128,7 +1128,7 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// Switching it by hand: the tray item, a double-click on the icon, or the
     /// shortcut. Each of those gets a notification, because the only other
     /// feedback is looking at the screen and deciding whether it changed, which
-    /// is the judgement a dimmer exists to make harder.
+    /// is the judgment a dimmer exists to make harder.
     ///
     /// The clock does NOT come through here. ApplySchedule moves the same state
     /// without announcing it: a scheduled change at 03:00 is not something to
@@ -1375,7 +1375,7 @@ internal sealed class AbodeNvContext : ApplicationContext
                 // is nothing to switch on, and offering the tick would promise
                 // an overlay that cannot be produced.
                 _miTargets.DropDownItems.Add(
-                    new ToolStripMenuItem(TrayState.Labelled(name, "unsupported version"))
+                    new ToolStripMenuItem(TrayState.Labeled(name, "unsupported version"))
                     { Enabled = false });
                 unhookable++; shown++;
                 continue;
@@ -1384,7 +1384,7 @@ internal sealed class AbodeNvContext : ApplicationContext
             // One parenthesis, however many things there are to say inside it.
             // Two products' worth of asides -- "(2 windows)" and then a dash and
             // another phrase -- read as two separate labels on one row.
-            string label = TrayState.Labelled(name,
+            string label = TrayState.Labeled(name,
                 insts != null && insts.Count > 1 ? insts.Count + " windows" : null,
                 st == TargetStatus.NoDocument ? "no document open" : null);
 
@@ -1588,11 +1588,11 @@ internal sealed class AbodeNvContext : ApplicationContext
             string name = first.TryGetValue(t.Id, out d) ? d.ShortLabel : t.ShortName;
 
             if (st == TargetStatus.Unsupported)
-                sb.AppendLine(TrayState.Labelled(name, "unsupported version, cannot attach"));
+                sb.AppendLine(TrayState.Labeled(name, "unsupported version, cannot attach"));
             else if (st == TargetStatus.NoDocument)
-                sb.AppendLine(TrayState.Labelled(name, "no document open"));
+                sb.AppendLine(TrayState.Labeled(name, "no document open"));
             else
-                sb.AppendLine(TrayState.Labelled(name, ProductOn(t) ? RegionFor(t) : "not selected"));
+                sb.AppendLine(TrayState.Labeled(name, ProductOn(t) ? RegionFor(t) : "not selected"));
         }
 
         if (here == 0) return "No supported Adobe application is running.";
@@ -1625,7 +1625,7 @@ internal sealed class AbodeNvContext : ApplicationContext
         // "window icon", not "tray icon": since the tray started following the
         // state it reads the state artwork below like the balloon does, and
         // AppIcon is what puts a picture on the dialogs and what the tray falls
-        // back to. A row labelled for the consumer it no longer has is how a
+        // back to. A row labeled for the consumer it no longer has is how a
         // diagnostics report starts lying.
         sb.AppendLine("    window icon            " + AbodeNvMain.IconSource);
         sb.AppendLine("    state artwork          " + Balloon.Artwork);
@@ -1979,7 +1979,7 @@ internal sealed class AboutDialog : Form
         AutoScaleMode = AutoScaleMode.Dpi;
         Padding = new Padding(14);
 
-        // Laid out rather than positioned. The licence notice is three
+        // Laid out rather than positioned. The license notice is three
         // paragraphs of somebody else's words, which cannot be shortened to fit
         // a number typed into SetBounds -- so the panel measures them and the
         // window takes the size that comes out.
@@ -2002,7 +2002,7 @@ internal sealed class AboutDialog : Form
                                        AboutInfo.RepositoryUrl, AboutInfo.RepositoryUrl, 12));
 
         // The GPL's own three paragraphs, verbatim, with the URL in the last one
-        // made clickable where it already stands. Adding a separate "licence"
+        // made clickable where it already stands. Adding a separate "license"
         // link beside it would be the same address written twice.
         for (int i = 0; i < AboutInfo.License.Length; i++)
         {
@@ -2268,7 +2268,7 @@ internal sealed class StrengthDialog : Form
         _bar.ValueChanged += delegate { Sync(); };
         Controls.Add(_bar);
 
-        // Grey, because it is the explanation rather than the setting: the eye
+        // Gray, because it is the explanation rather than the setting: the eye
         // should land on the number it came here to change first.
         _note.SetBounds(12, 88, 266, 20);
         _note.ForeColor = SystemColors.GrayText;
@@ -2458,7 +2458,7 @@ or as hotkey.* in the .ini.
 
 The document is never touched. Abode Night View only reads window geometry and
 paints its own windows; it never opens, scripts, or sends a message to Adobe.
-Disable it for colour-critical visual judgement.
+Disable it for color-critical visual judgment.
 ";
 
     [STAThread]

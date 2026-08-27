@@ -66,7 +66,7 @@ foreach ($s in $sizes) {
     $g.SmoothingMode      = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
     $g.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
 
-    # Letterbox: scale to fit, centre, keep aspect.
+    # Letterbox: scale to fit, center, keep aspect.
     $scale = [Math]::Min($s / $src.Width, $s / $src.Height)
     $w = [int][Math]::Round($src.Width  * $scale)
     $h = [int][Math]::Round($src.Height * $scale)
@@ -98,7 +98,7 @@ try {
         $bw.Write([Byte]$(if ($size -ge 256) { 0 } else { $size }))
         $bw.Write([Byte]0)               # palette count (0 = no palette)
         $bw.Write([Byte]0)               # reserved
-        $bw.Write([UInt16]1)             # colour planes
+        $bw.Write([UInt16]1)             # color planes
         $bw.Write([UInt16]32)            # bits per pixel
         $bw.Write([UInt32]$data.Length)
         $bw.Write([UInt32]$offset)

@@ -38,7 +38,7 @@ internal static class ProductPrefs
 
     /// <summary>
     /// An ABSENT key means "use the adapter's default", which is not the same as
-    /// an empty or unrecognised value. Collapsing those two cases is how every
+    /// an empty or unrecognized value. Collapsing those two cases is how every
     /// product silently ended up on "canvas" and Photoshop pointed at the wrong
     /// rectangle; Region.Normalize returns null for absent so they stay distinct.
     /// </summary>

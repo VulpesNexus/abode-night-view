@@ -76,7 +76,7 @@
         add("layers",          safe(function () { return doc.layers.length; }, "?"));
 
         // [Paper] is the swatch a document-mutating fallback would have changed.
-        // Recording its colour value here makes any such change impossible to miss.
+        // Recording its color value here makes any such change impossible to miss.
         add("[Paper] model",   safe(function () { return String(doc.swatches.item("Paper").model); }, "?"));
         add("[Paper] space",   safe(function () { return String(doc.swatches.item("Paper").space); }, "?"));
         add("[Paper] value",   safe(function () { return doc.swatches.item("Paper").colorValue.join(", "); }, "?"));
@@ -89,7 +89,7 @@
         add("window bounds",   safe(function () { return app.activeWindow.bounds.join(", "); }, "n/a"));
 
         lines.push("");
-        lines.push("--- COLOUR MANAGEMENT / PROOFING (must never change) ---");
+        lines.push("--- COLOR MANAGEMENT / PROOFING (must never change) ---");
         add("cms active",      safe(function () { return String(app.colorSettings.cmsSettingsEnabled); }, "?"));
         add("rgb policy",      safe(function () { return String(app.colorSettings.rgbPolicy); }, "?"));
         add("cmyk policy",     safe(function () { return String(app.colorSettings.cmykPolicy); }, "?"));

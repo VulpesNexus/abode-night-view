@@ -401,11 +401,11 @@ static class Verify
         // SetForegroundWindow only, nothing is sent to InDesign.
         if (Array.IndexOf(argv, "--focus") >= 0)
         {
-            // A minimised frame reports every child at -32000 and resolves to
-            // nothing, so "bring it forward" has to include un-minimising it.
+            // A minimized frame reports every child at -32000 and resolves to
+            // nothing, so "bring it forward" has to include un-minimizing it.
             if (Native.IsIconic(loc.MainWindow))
             {
-                Console.WriteLine("  " + AppName + " is minimised; restoring it.");
+                Console.WriteLine("  " + AppName + " is minimized; restoring it.");
                 ShowWindow(loc.MainWindow, SW_RESTORE);
                 System.Threading.Thread.Sleep(800);
             }
@@ -584,7 +584,7 @@ static class Verify
                   : "not owned – running zmode=above/topmost");
 
         // 5 -- click-through, across the whole rectangle rather than one point. A
-        //      single centre sample would not catch a child window that only covers
+        //      single center sample would not catch a child window that only covers
         //      part of the canvas.
         int probes = 0, through = 0;
         var badPoint = "";
@@ -601,7 +601,7 @@ static class Verify
             }
         Check(through == probes, "hit-test falls through to the application at every probe",
               through + "/" + probes + " points" +
-              (badPoint.Length > 0 ? "; overlay was hit at" + badPoint : "; centre -> " +
+              (badPoint.Length > 0 ? "; overlay was hit at" + badPoint : "; center -> " +
                Native.ClassOf(hit) + " pid=" + hitPid));
 
         // 6 -- InDesign's own top-level popups (menus, floating panels, tool tips,

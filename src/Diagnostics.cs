@@ -159,7 +159,7 @@ internal static class Diag
         w.WriteLine("             No capture, no second render path, no added frame.");
         w.WriteLine("  Greyscale  investigated and not shipped: the only non-capture route");
         w.WriteLine("             tested (Magnification API) did not perform the channel");
-        w.WriteLine("             mixing it was asked for, and needs an unsynchronised");
+        w.WriteLine("             mixing it was asked for, and needs an unsynchronized");
         w.WriteLine("             refresh timer. See measurements/magnification-api.md.");
         w.WriteLine("  Shader     investigated and not shipped: a correct tone curve needs");
         w.WriteLine("             capture plus GPU processing, and therefore a frame of");
@@ -188,7 +188,7 @@ internal static class Diag
                 w.WriteLine("      {0} {1}", d.Label, d.ProductVersion ?? "(version unreadable)");
                 w.WriteLine("      pid {0}, frame {1} class {2} rect {3}{4}",
                     d.Pid, Hex(d.Frame), Native.ClassOf(d.Frame), Native.RectOf(d.Frame),
-                    Native.IsIconic(d.Frame) ? " MINIMISED" : "");
+                    Native.IsIconic(d.Frame) ? " MINIMIZED" : "");
                 w.WriteLine("      dpi {0} ({1}%), monitor {2}",
                     Native.DpiOf(d.Frame), Native.DpiOf(d.Frame) * 100 / 96, MonitorOf(d.Frame));
 

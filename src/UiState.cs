@@ -150,7 +150,7 @@ internal static class TrayState
         if (noDocument > 0) return null;
 
         // Selected, running, readable, with something open, and still nothing
-        // on screen: minimised, or its window is off the visible desktop. Rare,
+        // on screen: minimized, or its window is off the visible desktop. Rare,
         // so worth a word.
         return "nothing to dim";
     }
@@ -200,7 +200,7 @@ internal static class TrayState
     /// Nothing here pads anything: the note is either there, after exactly one
     /// space, or the name stands alone.
     /// </summary>
-    public static string Labelled(string name, string note)
+    public static string Labeled(string name, string note)
     {
         if (name == null) name = "";
         return string.IsNullOrEmpty(note) ? name : name + " (" + note + ")";
@@ -209,13 +209,13 @@ internal static class TrayState
     /// <summary>Same idea, for several things to say at once. They share the
     /// one parenthesis: "Photoshop 2026 (2 windows, no document open)". Two
     /// parentheses in a row read as two labels on one row.</summary>
-    public static string Labelled(string name, params string[] notes)
+    public static string Labeled(string name, params string[] notes)
     {
         var kept = new System.Collections.Generic.List<string>();
         if (notes != null)
             foreach (string n in notes)
                 if (!string.IsNullOrEmpty(n)) kept.Add(n);
-        return Labelled(name, string.Join(", ", kept.ToArray()));
+        return Labeled(name, string.Join(", ", kept.ToArray()));
     }
 
     /// <summary>The Schedule item: the range if it is running, "off" if it is
@@ -223,12 +223,12 @@ internal static class TrayState
     /// and nothing else, so this line is where the state is read.</summary>
     public static string ScheduleItem(bool active, string range)
     {
-        return Labelled("Schedule", active ? range : "off");
+        return Labeled("Schedule", active ? range : "off");
     }
 
     public static string StrengthItem(int strength)
     {
-        return Labelled("Strength", strength.ToString(CultureInfo.InvariantCulture) + "%");
+        return Labeled("Strength", strength.ToString(CultureInfo.InvariantCulture) + "%");
     }
 
     /// <summary>
@@ -238,7 +238,7 @@ internal static class TrayState
     /// fact stated in two units -- the number the user chose, and the number the
     /// compositor multiplies by. Neither is useful without the other: 20% does
     /// not say what happens to a pixel, and k = 0.80 is not what the slider is
-    /// labelled in.
+    /// labeled in.
     ///
     /// The word "dim" is gone from it. The window is titled Strength, the
     /// slider is the only control in it, and the sentence below says what the
@@ -257,7 +257,7 @@ internal static class TrayState
     /// The consequence, in the only units anybody can check by looking at the
     /// screen. It names its input as well as its output, and it is a sentence
     /// with a full stop, because it is one -- the headline above is a reading,
-    /// this is what the reading means. The window draws it in grey for the same
+    /// this is what the reading means. The window draws it in gray for the same
     /// reason: it is the explanation, not the setting.
     /// </summary>
     public static string StrengthNote(int strength)
@@ -269,7 +269,7 @@ internal static class TrayState
 
     public static string TargetsItem(int selected, int running)
     {
-        return Labelled("Targets", string.Format(CultureInfo.InvariantCulture,
+        return Labeled("Targets", string.Format(CultureInfo.InvariantCulture,
                                                  "{0} selected, {1} running", selected, running));
     }
 
@@ -324,14 +324,14 @@ internal static class AboutInfo
         get { return RepositoryUrl != null && RepositoryUrl.Trim().Length > 0; }
     }
 
-    // ------------------------------------------------------------- licence
+    // ------------------------------------------------------------- license
 
     /// <summary>The SPDX identifier, which is what a machine reads: the LICENSE
     /// file, the .csproj if there ever is one, and GitHub's own detection.</summary>
     public const string LicenseId = "GPL-3.0-or-later";
     public const string LicenseName = "GNU General Public License, version 3";
 
-    /// <summary>Where the licence itself lives. The bare /licenses/ form is the
+    /// <summary>Where the license itself lives. The bare /licenses/ form is the
     /// one the GPL's own boilerplate tells you to print, so it is the one in the
     /// last paragraph; the full text is one click further in.</summary>
     public const string LicenseUrl = "https://www.gnu.org/licenses/";
@@ -339,7 +339,7 @@ internal static class AboutInfo
 
     /// <summary>
     /// The notice the GPL asks every program to be able to show, in the wording
-    /// the licence itself supplies ("How to Apply These Terms to Your New
+    /// the license itself supplies ("How to Apply These Terms to Your New
     /// Programs"). It is here rather than in the dialog because it is text, not
     /// layout: the harness asserts the three paragraphs are present and intact
     /// without opening a window, and the dialog's job is only to wrap them.

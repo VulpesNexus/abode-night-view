@@ -15,7 +15,7 @@
 **Status: research, not tested.** No macOS machine was available while this was
 written. Everything below is drawn from Apple's documentation and from what the
 Windows implementation had to do; nothing in it has been run. Where a claim is
-about behaviour rather than about an API's existence, it says so.
+about behavior rather than about an API's existence, it says so.
 
 The Windows product is finished and measured. This document exists to answer one
 question honestly: *what would the same product be on macOS, and is it the same
@@ -55,7 +55,7 @@ documented in a way its Win32 window classes are not.
 ### Finding the window
 
 `CGWindowListCopyWindowInfo` returns, for every on-screen window,
-`kCGWindowOwnerPID`, `kCGWindowBounds`, `kCGWindowLayer` and
+`kCGWindowOwnerPID`, `kCGWindowBounds`, `kCGWindowLayer`, and
 `kCGWindowNumber` — **with no permission at all**. Only `kCGWindowName`, the
 title, is gated behind Screen Recording. So the *document window's* rectangle is
 free.
@@ -91,7 +91,7 @@ papering over.
 `collectionBehavior` including `.canJoinAllSpaces` and `.stationary`, and
 `hidesOnDeactivate = false`. `ignoresMouseEvents` is the documented equivalent of
 `WS_EX_TRANSPARENT` and is the whole of the input-transparency story — there is
-no macOS analogue of the `WM_NCHITTEST` belt-and-braces the Windows build also
+no macOS analog of the `WM_NCHITTEST` belt-and-braces the Windows build also
 carries.
 
 `alphaValue` composites in the same source-over form Windows uses, so the
@@ -124,7 +124,7 @@ target application is frontmost**, at `.floating` level, and hide it on
 `kCGPopUpMenuWindowLevel`, well above floating, so menus stay undimmed for free —
 better than Windows, where that had to be checked.
 
-The cost is a genuine behavioural difference to document: on Windows a
+The cost is a genuine behavioral difference to document: on Windows a
 background InDesign window stays dimmed; on macOS it would not. That is a
 smaller loss than it sounds — you are not reading a window you are not in — but
 it is a difference, not a detail.
@@ -135,7 +135,7 @@ floating over the canvas would be dimmed with it.
 ### Tracking movement
 
 `AXObserverCreate` with `kAXWindowMovedNotification`, `kAXWindowResizedNotification`,
-`kAXFocusedWindowChangedNotification` is the direct analogue of the WinEvent
+`kAXFocusedWindowChangedNotification` is the direct analog of the WinEvent
 hooks, and like them it is out-of-process and involves no injection.
 
 ### Global shortcuts
@@ -153,7 +153,7 @@ permission. That must stay isolated to those modes: a Neutral-only user should
 never see that prompt. This is the same tiering the Windows build ended up with,
 arrived at for a different reason.
 
-Note one asymmetry in Apple's favour: `CIColorCube` is a genuine 3D LUT, so the
+Note one asymmetry in Apple's favor: `CIColorCube` is a genuine 3D LUT, so the
 non-affine tone curve that Windows cannot do without building a whole D3D
 pipeline is a few lines of Core Image. The obstacle on macOS is the permission
 and the capture latency, not the maths.
@@ -168,7 +168,7 @@ The measured reason: strip out the platform layer and what is left is the
 settings file format, the mode/strength model, the region vocabulary, the target
 identity list, and the state machine. That is a few hundred lines. The Windows
 implementation is ~2,900 lines of C#, and essentially all of the interesting part
-is HWNDs, owner groups, WinEvent hooks and DWM behaviour — none of which
+is HWNDs, owner groups, WinEvent hooks, and DWM behavior — none of which
 survives translation.
 
 Wrapping a few hundred lines of shared logic in a cross-platform runtime, and
@@ -180,7 +180,7 @@ product cannot afford.
 
 What should be shared is the **contract**: identical `.ini` keys, identical
 region names, identical product ids, identical `--probe` output shape. Then a
-settings file, a bug report and a support answer are the same on both platforms
+settings file, a bug report, and a support answer are the same on both platforms
 even though no line of code is.
 
 ---
@@ -229,7 +229,7 @@ the design:
 2. Does `ignoresMouseEvents` really pass every event through on the current
    macOS, including tablet and trackpad gestures?
 3. Does the Accessibility hierarchy expose a stable canvas element in
-   InDesign, Illustrator and Photoshop — and is it the same shape in all three,
+   InDesign, Illustrator, and Photoshop — and is it the same shape in all three,
    the way the OWL hierarchy turned out to be on Windows?
 4. How quickly does an `AXObserver` fire during a live window drag, compared
    with the 15–16 ms the WinEvent path measures?

@@ -65,7 +65,7 @@ internal sealed class TargetForm : Form
     protected override void OnPaintBackground(PaintEventArgs e) { }
 
     /// <summary>
-    /// Horizontal bands of exact 8-bit grey. A single screen capture of the client
+    /// Horizontal bands of exact 8-bit gray. A single screen capture of the client
     /// area therefore contains every input level we want to measure, and the output
     /// for each is the mean of a large uniform region rather than a single pixel.
     /// </summary>

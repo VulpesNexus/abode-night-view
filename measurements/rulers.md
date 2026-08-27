@@ -103,7 +103,7 @@ the canvas origin. It was rejected:
   inside the canvas, too large puts a dimmed band across the artwork.
 
 Everything else on the list was already ruled out by the project's own
-constraints: pixel-colour detection, screenshot analysis and capture-based
+constraints: pixel-color detection, screenshot analysis, and capture-based
 masking all mean reading rendered content, which is the thing Neutral exists to
 avoid.
 
@@ -126,5 +126,5 @@ These strips are thin and high-contrast and their content genuinely moves betwee
 two captures — a scrollbar thumb slides, a ruler's cursor indicator follows the
 mouse, tick labels change with the scroll position. The first version of the
 check used a 3 % band and failed on a run where nothing was wrong, reporting
-ratios of 1.158, 0.937, 1.088 and 0.955: jitter, in both directions, not dimming.
+ratios of 1.158, 0.937, 1.088, and 0.955: jitter, in both directions, not dimming.
 What must never happen is a strip reading 0.45, and that is unmistakable.

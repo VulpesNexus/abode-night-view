@@ -11,7 +11,7 @@
 //  Abode Night View - synthetic Adobe-shaped windows for the audit
 // ----------------------------------------------------------------------------
 //  Why raw Win32 and not WinForms
-//      The adapters recognise a product by its frame window CLASS and validate
+//      The adapters recognize a product by its frame window CLASS and validate
 //      the viewport by its structural relationship -- an OWL.Document whose
 //      parent is an OWL.TabGroup. To test that machinery mechanically, the
 //      harness has to be able to produce windows with exactly those class names.
@@ -105,7 +105,7 @@ internal static class HarnessNative
 /// One synthetic Adobe-shaped application window. Everything the audit needs to
 /// do to it -- move it, resize it, add a document, close a document, raise it
 /// without its owned windows, put an owned dialog over it -- is a method here,
-/// so the multi-target behaviour can be tested without touching Adobe at all.
+/// so the multi-target behavior can be tested without touching Adobe at all.
 /// </summary>
 internal sealed class SyntheticApp : IDisposable
 {
@@ -178,7 +178,7 @@ internal sealed class SyntheticApp : IDisposable
     }
 
     /// <summary>
-    /// Horizontal bands of exact 8-bit grey, so one capture of the canvas contains
+    /// Horizontal bands of exact 8-bit gray, so one capture of the canvas contains
     /// every input level we want to measure and the output for each is the mean of
     /// a large uniform region rather than a single pixel.
     /// </summary>
@@ -353,7 +353,7 @@ internal sealed class SyntheticApp : IDisposable
             Native.SWP_NOOWNERZORDER);
     }
 
-    public void Minimise() { HarnessNative.ShowWindow(Frame, HarnessNative.SW_MINIMIZE); }
+    public void Minimize() { HarnessNative.ShowWindow(Frame, HarnessNative.SW_MINIMIZE); }
     public void Restore() { HarnessNative.ShowWindow(Frame, HarnessNative.SW_RESTORE); Layout(); }
     public void HideFrame() { HarnessNative.ShowWindow(Frame, HarnessNative.SW_HIDE); }
     public void ShowFrame() { HarnessNative.ShowWindow(Frame, HarnessNative.SW_SHOW); Layout(); }
@@ -427,7 +427,7 @@ internal sealed class AuditTarget : System.Windows.Forms.IWin32Window, IDisposab
 
     public void Show() { HarnessNative.ShowWindow(Handle, HarnessNative.SW_SHOW); }
     public void Hide() { HarnessNative.ShowWindow(Handle, HarnessNative.SW_HIDE); }
-    public void Minimise() { HarnessNative.ShowWindow(Handle, HarnessNative.SW_MINIMIZE); }
+    public void Minimize() { HarnessNative.ShowWindow(Handle, HarnessNative.SW_MINIMIZE); }
     public void Restore() { HarnessNative.ShowWindow(Handle, HarnessNative.SW_RESTORE); }
 
     public void Dispose()
