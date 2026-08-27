@@ -3,6 +3,7 @@
 [![build](https://github.com/VulpesNexus/abode-night-view/actions/workflows/build.yml/badge.svg)](https://github.com/VulpesNexus/abode-night-view/actions/workflows/build.yml)
 
 A display-only dimmer for Adobe document viewports for those late-night crunching sessions.
+
 *Please remember to turn it off when doing print preparation or color proofing.*
 
 **Abode Night View** parks a black, click-through, layered window over each Adobe
