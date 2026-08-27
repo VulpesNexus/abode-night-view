@@ -116,8 +116,9 @@ internal static class TrayState
 
     /// <summary>
     /// Why nothing is being dimmed, in the words the Targets menu uses for the
-    /// same situation. The counts come from one survey of the desktop, so the
-    /// hover text and the menu are two renderings of a single answer.
+    /// same situation -- or null when the answer is not worth the reader's
+    /// attention. The counts come from one survey of the desktop, so the hover
+    /// text and the menu cannot contradict each other.
     ///
     /// The reported bug was the tooltip saying "no target" while the menu said
     /// "Photoshop 2026 (no document open)" -- both true of their own inputs and
@@ -125,39 +126,67 @@ internal static class TrayState
     /// overlays and calling zero of them "no target". An application that is
     /// running and selected IS a target; whether it currently offers anything
     /// to dim is a different question, and this is where it gets answered.
+    ///
+    /// "No document open" is not one of the answers any more. It is the single
+    /// most ordinary thing an Adobe application can be doing -- sitting on its
+    /// own home screen, between jobs -- and a hover that reports it is spending
+    /// the line on the one state the user is least likely to be asking about.
+    /// The Targets menu still says it, per product, where it distinguishes one
+    /// product from another; here it distinguished nothing.
+    ///
+    /// Returning null rather than a fourth phrase is deliberate: silence is
+    /// what "nothing is wrong" should look like, and a phrase like "idle" would
+    /// only be the same noise under a shorter name. The two answers left are
+    /// the two a user would actually want interrupting them.
     /// </summary>
     public static string IdleReason(int running, int noDocument, int unsupported)
     {
         if (running <= 0) return "no target";
-        if (noDocument > 0) return "no document open";
+
+        // Ahead of "no document open", which used to win: a version this build
+        // cannot read is the anomaly, and it is the one that survives.
         if (unsupported > 0) return "unsupported version";
 
-        // Selected, running, readable, and still nothing on screen: minimised,
-        // or its window is off the visible desktop. Not an error, and not
-        // "no target" either.
+        if (noDocument > 0) return null;
+
+        // Selected, running, readable, with something open, and still nothing
+        // on screen: minimised, or its window is off the visible desktop. Rare,
+        // so worth a word.
         return "nothing to dim";
     }
 
     /// <summary>
-    /// Format is fixed: "Abode Night View: [ON] | 55%", with the reason nothing
-    /// is dimmed appended when there is one. Derived from the same survey the
-    /// menu is built from, so the two cannot disagree -- which the three-argument
+    /// Switched on: "Abode Night View: [ON] | 55%", with the reason nothing is
+    /// dimmed appended when there is one. Derived from the same survey the menu
+    /// is built from, so the two cannot disagree -- which the three-argument
     /// version of this function claimed in this comment and did not do.
     ///
-    /// The filter name used to sit between the two. It was removed because it
-    /// is the same word in every possible state -- Neutral is the only mode
-    /// this build renders -- so it spent a third of a 63-character budget
-    /// saying nothing. Dropping it is also what let the product be named in
-    /// full here instead of as "Abode NV", and it is what leaves room for the
+    /// Switched off: "Abode Night View: [OFF]", and nothing else. The strength
+    /// was still being shown, which is a number describing an effect that is
+    /// not being applied -- the hover said 55% over a screen that was not dimmed
+    /// at all. A stored setting is not a state, and the hover reports the state.
+    /// The value is still one click away, on the Strength item, where it is
+    /// being read as a setting rather than as a description of the screen.
+    ///
+    /// The filter name used to sit between the state and the number. It was
+    /// removed because it is the same word in every possible state -- Neutral is
+    /// the only mode this build renders -- so it spent a third of a 63-character
+    /// budget saying nothing. Dropping it is also what let the product be named
+    /// in full here instead of as "Abode NV", and it is what leaves room for the
     /// reason above.
     /// </summary>
     public static string Tooltip(bool enabled, int strength, int liveOverlays,
                                  int running, int noDocument, int unsupported)
     {
+        if (!enabled) return "Abode Night View: [OFF]";
+
         string s = string.Format(CultureInfo.InvariantCulture,
-            "Abode Night View: [{0}] | {1}%", enabled ? "ON" : "OFF", strength);
-        if (enabled && liveOverlays == 0)
-            s += " | " + IdleReason(running, noDocument, unsupported);
+            "Abode Night View: [ON] | {0}%", strength);
+        if (liveOverlays == 0)
+        {
+            string why = IdleReason(running, noDocument, unsupported);
+            if (!string.IsNullOrEmpty(why)) s += " | " + why;
+        }
         return s.Length > TooltipLimit ? s.Substring(0, TooltipLimit) : s;
     }
 
@@ -202,6 +231,42 @@ internal static class TrayState
         return Labelled("Strength", strength.ToString(CultureInfo.InvariantCulture) + "%");
     }
 
+    /// <summary>
+    /// The Strength window's headline, above the slider: "20% (k = 0.80)".
+    ///
+    /// The setting and the coefficient it means, together, because they are one
+    /// fact stated in two units -- the number the user chose, and the number the
+    /// compositor multiplies by. Neither is useful without the other: 20% does
+    /// not say what happens to a pixel, and k = 0.80 is not what the slider is
+    /// labelled in.
+    ///
+    /// The word "dim" is gone from it. The window is titled Strength, the
+    /// slider is the only control in it, and the sentence below says what the
+    /// dimming does; "20% dim" was the third place on one small dialog to say
+    /// which direction the number runs.
+    /// </summary>
+    public static string StrengthHeadline(int strength)
+    {
+        return string.Format(CultureInfo.InvariantCulture, "{0}% (k = {1:0.00})",
+                             strength, 1.0 - strength / 100.0);
+    }
+
+    /// <summary>
+    /// The line under the slider: "255 (pure white) now displays as 204."
+    ///
+    /// The consequence, in the only units anybody can check by looking at the
+    /// screen. It names its input as well as its output, and it is a sentence
+    /// with a full stop, because it is one -- the headline above is a reading,
+    /// this is what the reading means. The window draws it in grey for the same
+    /// reason: it is the explanation, not the setting.
+    /// </summary>
+    public static string StrengthNote(int strength)
+    {
+        return string.Format(CultureInfo.InvariantCulture,
+                             "255 (pure white) now displays as {0}.",
+                             (int)Math.Round(255 * (1.0 - strength / 100.0)));
+    }
+
     public static string TargetsItem(int selected, int running)
     {
         return Labelled("Targets", string.Format(CultureInfo.InvariantCulture,
@@ -209,17 +274,24 @@ internal static class TrayState
     }
 
     /// <summary>
-    /// The state as one line, for the notification balloon: "[ON] 55% (k = 0.45)".
+    /// The state as one line, for the notification balloon: "[ON] 55% (k = 0.45)",
+    /// and "[OFF]" on its own.
     ///
     /// k is the multiplier the compositor actually applies, and it is the only
     /// number in the product that means anything physical -- 55 % dim is
     /// k = 0.45, and white 255 lands on 115. It is stated next to the
-    /// percentage so the two are never separated.
+    /// percentage so the two are never separated. Which is exactly why both
+    /// leave together: switched off there is no multiply, so "k = 0.45" was
+    /// naming a coefficient nothing was multiplying by, on the one notification
+    /// whose whole job is to say that the dimming has stopped. The line under it
+    /// already tells the user how to switch it back on, and the strength they
+    /// will get when they do is on the Strength item.
     /// </summary>
     public static string StatusLine(bool enabled, int strength)
     {
-        return string.Format(CultureInfo.InvariantCulture, "[{0}] {1}% (k = {2:0.00})",
-            enabled ? "ON" : "OFF", strength, 1.0 - strength / 100.0);
+        if (!enabled) return "[OFF]";
+        return string.Format(CultureInfo.InvariantCulture, "[ON] {0}% (k = {1:0.00})",
+            strength, 1.0 - strength / 100.0);
     }
 }
 

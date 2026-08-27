@@ -1170,7 +1170,10 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// </summary>
     private void BuildTray()
     {
-        _tray.Icon = AbodeNvMain.AppIcon(SystemInformation.SmallIconSize.Width);
+        // Before Visible: a NotifyIcon with no Icon is added to the notification
+        // area as a blank slot, and the shell does not always redraw it when one
+        // arrives afterwards.
+        ShowStateIcon();
         _tray.Visible = true;
 
         var menu = new ContextMenuStrip();
@@ -1619,8 +1622,16 @@ internal sealed class AbodeNvContext : ApplicationContext
         sb.AppendLine("    win-event hooks        " + (_hooks.Count + _procHooks.Count) +
                       " (" + _hooks.Count + " global + " + _procHooks.Count + " process-scoped)");
         sb.AppendLine("    resync timer           " + _resync.Interval + " ms");
-        sb.AppendLine("    tray icon              " + AbodeNvMain.IconSource);
-        sb.AppendLine("    balloon artwork        " + Balloon.Artwork);
+        // "window icon", not "tray icon": since the tray started following the
+        // state it reads the state artwork below like the balloon does, and
+        // AppIcon is what puts a picture on the dialogs and what the tray falls
+        // back to. A row labelled for the consumer it no longer has is how a
+        // diagnostics report starts lying.
+        sb.AppendLine("    window icon            " + AbodeNvMain.IconSource);
+        sb.AppendLine("    state artwork          " + Balloon.Artwork);
+        sb.AppendLine("    tray icon shows        " +
+                      (_trayIconState < 0 ? "(not set yet)" :
+                       _trayIconState == 1 ? "on (sunglasses)" : "off (plain)"));
         sb.AppendLine("    balloon mechanism      " + Balloon.Mechanism);
 
         sb.AppendLine("    products");
@@ -1668,6 +1679,37 @@ internal sealed class AbodeNvContext : ApplicationContext
         SurveySelected(out running, out noDoc, out unsupported);
         _tray.Text = TrayState.Tooltip(_enabled, _strength, _liveOverlays,
                                        running, noDoc, unsupported);
+        ShowStateIcon();
+    }
+
+    /// <summary>-1 until the icon has been set once, so the first call always
+    /// sets one. Not a bool: "off" and "never set" are different, and starting
+    /// up switched off has to still put an icon in the tray.</summary>
+    private int _trayIconState = -1;
+
+    /// <summary>
+    /// The tray icon follows the state: plain when the dimming is off, in
+    /// sunglasses when it is on. Hung off UpdateTrayText because every path
+    /// that can change _enabled already calls it -- the menu item, the double
+    /// click, the hotkey, the schedule, the command line and the resync -- so
+    /// the picture and the words it explains can never be updated separately.
+    ///
+    /// Guarded on the state rather than assigned every time: each assignment is
+    /// a Shell_NotifyIcon(NIM_MODIFY) round trip to the shell, and this runs
+    /// from Sync, which runs on the resync timer. Setting the same icon four
+    /// times a second is a call the shell does not need and a flicker some
+    /// tray implementations show.
+    /// </summary>
+    private void ShowStateIcon()
+    {
+        int want = _enabled ? 1 : 0;
+        if (want == _trayIconState) return;
+
+        Icon art = AbodeNvMain.StateIcon(_enabled, SystemInformation.SmallIconSize.Width);
+        if (art == null) return;      // leave whatever is there; never blank the tray
+
+        _trayIconState = want;
+        _tray.Icon = art;
     }
 
     /// <summary>
@@ -2197,6 +2239,7 @@ internal sealed class StrengthDialog : Form
 {
     private readonly TrackBar _bar = new TrackBar();
     private readonly Label _read = new Label();
+    private readonly Label _note = new Label();
     public int Value { get { return _bar.Value; } }
 
     public StrengthDialog(int start)
@@ -2205,25 +2248,36 @@ internal sealed class StrengthDialog : Form
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterScreen;
         MinimizeBox = false; MaximizeBox = false; ShowInTaskbar = false;
-        // Wide enough for the longest reading the readout can produce, which is
-        // the 0% one: "0% dim | 255 (pure white) displays as 255 | k = 1.00".
-        // Measured rather than guessed -- DialogShot reports whether every label
-        // fits, and this dialog is the one that grew when the wording changed.
-        ClientSize = new Size(420, 132);
+        // The reading sits above the slider and its consequence below it, so
+        // the control is between the number it sets and the effect that number
+        // has. Both used to be one line above, pipe-separated, which put three
+        // readings in a row and left the eye to split them.
+        //
+        // Narrower than it was, because the width was set by that concatenated
+        // line and the longest thing here now is the sentence underneath.
+        // DialogShot reports whether every label fits; this dialog is the one
+        // that has moved every time the wording has.
+        ClientSize = new Size(290, 158);
 
-        _bar.SetBounds(12, 34, 396, 45);
+        _read.SetBounds(12, 12, 266, 20);
+        Controls.Add(_read);
+
+        _bar.SetBounds(12, 38, 266, 45);
         _bar.Minimum = 0; _bar.Maximum = 90; _bar.TickFrequency = 5;
         _bar.Value = Math.Max(0, Math.Min(90, start));
         _bar.ValueChanged += delegate { Sync(); };
         Controls.Add(_bar);
 
-        _read.SetBounds(12, 10, 396, 20);
-        Controls.Add(_read);
+        // Grey, because it is the explanation rather than the setting: the eye
+        // should land on the number it came here to change first.
+        _note.SetBounds(12, 88, 266, 20);
+        _note.ForeColor = SystemColors.GrayText;
+        Controls.Add(_note);
 
         var ok = new Button { Text = "OK", DialogResult = DialogResult.OK };
-        ok.SetBounds(244, 92, 80, 26);
+        ok.SetBounds(114, 118, 80, 26);
         var cancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel };
-        cancel.SetBounds(328, 92, 80, 26);
+        cancel.SetBounds(198, 118, 80, 26);
         Controls.Add(ok); Controls.Add(cancel);
         AcceptButton = ok; CancelButton = cancel;
 
@@ -2232,15 +2286,11 @@ internal sealed class StrengthDialog : Form
 
     private void Sync()
     {
-        // Three readings of one number, separated by pipes: the percentage is
-        // the setting, the middle is what the brightest pixel on the screen
-        // actually becomes, and k is what the compositor multiplies by. The
-        // middle reading names its input as well as its output -- "255 (pure
-        // white) displays as 204" says which direction the sum runs, where
-        // "white 255 becomes 204" left the reader to infer it.
-        _read.Text = string.Format(CultureInfo.InvariantCulture,
-            "{0}% dim | 255 (pure white) displays as {1} | k = {2:0.00}",
-            _bar.Value, (int)Math.Round(255 * (1 - _bar.Value / 100.0)), 1 - _bar.Value / 100.0);
+        // Both strings come from TrayState so the harness reads exactly what
+        // the user reads -- these were the last user-visible strings in the
+        // program still being formatted at the point of display.
+        _read.Text = TrayState.StrengthHeadline(_bar.Value);
+        _note.Text = TrayState.StrengthNote(_bar.Value);
     }
 }
 
@@ -2298,6 +2348,27 @@ internal static class AbodeNvMain
         catch { }
         IconSource += "; FELL BACK TO THE STOCK WINDOWS ICON";
         return SystemIcons.Application;
+    }
+
+    /// <summary>
+    /// The icon for a state, at an exact size: the plain artwork when the
+    /// dimming is off, the same character in sunglasses when it is on. This is
+    /// what the notification area shows, and it is the same pair the balloon
+    /// shows, resolved through the same function -- so a notification cannot
+    /// arrive wearing a different face from the icon that raised it.
+    ///
+    /// The off artwork is generated from the same source PNG as the Win32 icon
+    /// group in this executable, so falling back to <see cref="AppIcon"/> when
+    /// the managed resource is missing is a fallback in provenance only: the
+    /// user sees the same picture either way. The on artwork has no such
+    /// twin, so a build without the resource shows the off icon in both states
+    /// rather than no icon in either -- wrong, but wrong in the direction that
+    /// leaves the program usable, and --diagnostics says so.
+    /// </summary>
+    public static Icon StateIcon(bool enabled, int size)
+    {
+        Icon art = Balloon.Art(enabled, size);
+        return art != null ? art : AppIcon(size);
     }
 
     private static bool Has(string[] argv, string name)

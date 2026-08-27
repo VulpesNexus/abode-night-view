@@ -520,6 +520,30 @@ internal static class SelfTest
               Balloon.Artwork.IndexOf("NOT IN THIS BUILD", StringComparison.Ordinal) < 0,
               "and --diagnostics has nothing to complain about", Balloon.Artwork);
 
+        // 2b. The same artwork at the other end of the ladder. The tray icon now
+        //     follows the state too, and a tray asks at SM_CXSMICON -- 16 px at
+        //     100% scaling, 32 at 200%. The resource originally carried nothing
+        //     below 32, so this is the assertion that the small entries are
+        //     there: an icon LARGER than the size asked for is one the shell has
+        //     to shrink, and shrinking a 2 px sunglasses bar is how the on state
+        //     stops being distinguishable from the off state at a glance.
+        foreach (int px in new[] { 16, 20, 24, 32 })
+        {
+            Icon small = Balloon.Art(true, px);
+            Check(small != null && small.Width > 0 && small.Width <= px,
+                  "the on artwork has an entry at or below " + px + "px",
+                  small == null ? "null" : small.Width + "x" + small.Height + " for " + px);
+        }
+        int tray = SystemInformation.SmallIconSize.Width;
+        Check(Balloon.Art(false, tray) != null && Balloon.Art(true, tray) != null &&
+              Balloon.Art(false, tray).Handle != Balloon.Art(true, tray).Handle,
+              "and the two states are still two pictures at the tray's own size",
+              tray + "px");
+        Check(Balloon.Art(true, tray).Handle == Balloon.Art(true, tray).Handle &&
+              Balloon.Art(true, 96).Handle != Balloon.Art(true, 16).Handle,
+              "the cache is keyed by size, so the tray and the balloon do not " +
+              "hand each other the wrong one", null);
+
         // 3. The reflection. This is the part with a real chance of breaking on
         //    a future runtime, and the point of testing it is to find out from
         //    the harness rather than from a user's screenshot.
@@ -1206,10 +1230,25 @@ internal static class SelfTest
 
         Check(TrayState.Tooltip(true, 55, 1, 1, 0, 0) == "Abode Night View: [ON] | 55%",
               "tooltip is exactly the format asked for", TrayState.Tooltip(true, 55, 1, 1, 0, 0));
-        Check(TrayState.Tooltip(false, 55, 1, 1, 0, 0) == "Abode Night View: [OFF] | 55%",
-              "and in the off state", TrayState.Tooltip(false, 55, 1, 1, 0, 0));
+        Check(TrayState.Tooltip(false, 55, 1, 1, 0, 0) == "Abode Night View: [OFF]",
+              "and switched off it is the tag alone", TrayState.Tooltip(false, 55, 1, 1, 0, 0));
         Check(!TrayState.Tooltip(true, 55, 1, 1, 0, 0).Contains("Neutral"),
               "the only mode there is is not named: the word never varies", null);
+
+        // ------------------------------------------------------------------
+        // Reported: switched off, the hover still read "| 55%" -- a strength
+        // describing an effect that was not being applied to anything. Asserted
+        // over the whole range rather than at one value, because the fault was
+        // in the format string, so it was true of every strength at once.
+        // ------------------------------------------------------------------
+        foreach (int v in new[] { 0, 1, 20, 55, 99, 100 })
+        {
+            string off = TrayState.Tooltip(false, v, 0, 1, 1, 0);
+            Check(off == "Abode Night View: [OFF]",
+                  "off carries no strength, whatever the stored strength is", off);
+        }
+        Check(TrayState.Tooltip(false, 55, 0, 1, 1, 0).IndexOf('%') < 0,
+              "and no percent sign for a number to hang off", null);
         Check(TrayState.Tooltip(true, 55, 0, 0, 0, 0).EndsWith("| no target"),
               "on with nothing running at all says no target",
               TrayState.Tooltip(true, 55, 0, 0, 0, 0));
@@ -1220,23 +1259,38 @@ internal static class SelfTest
               TrayState.Tooltip(true, 100, 0, 0, 0, 0).Length + " characters");
 
         // ------------------------------------------------------------------
-        // The reported bug, as an assertion. Photoshop is running, selected,
-        // and showing its welcome screen: the menu calls that
+        // The originally reported bug, as an assertion. Photoshop is running,
+        // selected, and showing its welcome screen: the menu calls that
         // "Photoshop 2026 (no document open)" and the tooltip used to call the
-        // same machine "no target". One product, one survey, two renderings --
-        // so the two are checked against each other here rather than each
-        // against a literal.
+        // same machine "no target", which is the one thing it must never say
+        // about a product that is running.
+        //
+        // What the hover says INSTEAD has since changed -- see below -- so the
+        // assertion is on the contradiction, not on the replacement wording.
         // ------------------------------------------------------------------
         string menuRow = TrayState.Labelled("Photoshop 2026", "no document open");
         string hover   = TrayState.Tooltip(true, 55, 0, 1, 1, 0);
 
         Check(!hover.Contains("no target"),
               "a running selected product is never called 'no target'", hover);
-        Check(hover.EndsWith("| no document open"),
-              "the hover gives the menu's reason, not a count of overlays", hover);
-        Check(menuRow.Contains(TrayState.IdleReason(1, 1, 0)),
-              "hover and menu row use the same words for the same situation",
-              menuRow + "  /  " + hover);
+        Check(menuRow.Contains("no document open"),
+              "the menu still says it per product, where it tells products apart",
+              menuRow);
+
+        // ------------------------------------------------------------------
+        // Reported: "no document open" on the hover is noise. It is the most
+        // ordinary state an Adobe application can be in, and unlike the menu --
+        // which says it about ONE named product among several -- the hover said
+        // it about the whole desktop, where it distinguished nothing. The hover
+        // now says nothing at all in that case, and silence is asserted as a
+        // value rather than left to whatever a fourth phrase would have been.
+        // ------------------------------------------------------------------
+        Check(TrayState.IdleReason(1, 1, 0) == null,
+              "no document open is not a reason the hover gives any more", null);
+        Check(hover == "Abode Night View: [ON] | 55%",
+              "so the hover is the state and the strength, and stops there", hover);
+        Check(hover.IndexOf('|') == hover.LastIndexOf('|'),
+              "one separator, not a trailing one with nothing after it", hover);
 
         Check(TrayState.IdleReason(0, 0, 0) == "no target",
               "nothing running is the only thing called no target", null);
@@ -1244,15 +1298,62 @@ internal static class SelfTest
               "a running product this build cannot read says which", null);
         Check(TrayState.IdleReason(1, 0, 0) == "nothing to dim",
               "running, readable and off-screen is neither of the above", null);
-        Check(TrayState.IdleReason(2, 1, 1) == "no document open",
-              "with several reasons at once the actionable one wins", null);
+        Check(TrayState.IdleReason(2, 1, 1) == "unsupported version",
+              "with several reasons at once the anomalous one wins, not the " +
+              "ordinary one it used to lose to", null);
 
         foreach (int r in new[] { 0, 1, 4 })
             foreach (int nd in new[] { 0, 1 })
                 foreach (int un in new[] { 0, 1 })
-                    Check(TrayState.Tooltip(true, 90, 0, r, nd, un).Length <= TrayState.TooltipLimit,
-                          "every reason still fits the 63-character budget",
-                          TrayState.Tooltip(true, 90, 0, r, nd, un));
+                {
+                    string t = TrayState.Tooltip(true, 90, 0, r, nd, un);
+                    Check(t.Length <= TrayState.TooltipLimit,
+                          "every reason still fits the 63-character budget", t);
+                    Check(!t.EndsWith("|") && !t.EndsWith("| "),
+                          "and a silent reason leaves no dangling separator", t);
+                }
+
+        // ------------------------------------------------------- the readout
+        //
+        // The Strength window: the setting and its coefficient above the
+        // slider, what they do to a pixel below it. It was all one line with
+        // three readings pipe-separated, which asks the eye to do the
+        // splitting. Both halves are asserted because they are the two strings
+        // the user reads on that dialog and there is nothing else on it.
+        Check(TrayState.StrengthHeadline(20) == "20% (k = 0.80)",
+              "the headline is the setting and the coefficient it means",
+              TrayState.StrengthHeadline(20));
+        Check(TrayState.StrengthNote(20) == "255 (pure white) now displays as 204.",
+              "and the line under the slider says what that does to a pixel",
+              TrayState.StrengthNote(20));
+
+        Check(TrayState.StrengthHeadline(0) == "0% (k = 1.00)" &&
+              TrayState.StrengthNote(0) == "255 (pure white) now displays as 255.",
+              "0% leaves white alone and k is 1", null);
+
+        // 25, not 26, and that is not a typo. k is 1 - 90/100.0, which in binary
+        // is 0.09999999999999998 rather than 0.1, so the product is
+        // 25.499999999999996 and lands below the halfway point. Written down
+        // because the obvious "correction" to 26 is a change to a number the
+        // user reads, made on the strength of arithmetic done on paper.
+        Check(TrayState.StrengthHeadline(90) == "90% (k = 0.10)" &&
+              TrayState.StrengthNote(90) == "255 (pure white) now displays as 25.",
+              "the darkest setting reports the value the arithmetic actually gives",
+              TrayState.StrengthNote(90));
+
+        Check(!TrayState.StrengthHeadline(55).Contains("dim"),
+              "the headline does not also say which way the number runs: the " +
+              "sentence under the slider already does", TrayState.StrengthHeadline(55));
+        foreach (int v in new[] { 0, 20, 55, 90 })
+        {
+            Check(TrayState.StrengthHeadline(v).IndexOf('|') < 0 &&
+                  TrayState.StrengthNote(v).IndexOf('|') < 0,
+                  "nothing on the dialog is pipe-separated any more",
+                  TrayState.StrengthHeadline(v) + "  /  " + TrayState.StrengthNote(v));
+            Check(TrayState.StrengthHeadline(v).IndexOf("  ", StringComparison.Ordinal) < 0 &&
+                  TrayState.StrengthNote(v).IndexOf("  ", StringComparison.Ordinal) < 0,
+                  "and no run of spaces got into either line at " + v + "%", null);
+        }
 
         // The notification balloon's first line. Asserted character for
         // character: it is the one line the user reads at launch, and k is the
@@ -1260,13 +1361,21 @@ internal static class SelfTest
         Check(TrayState.StatusLine(true, 55) == "[ON] 55% (k = 0.45)",
               "the balloon states the state, the strength and k, and nothing else",
               TrayState.StatusLine(true, 55));
-        Check(TrayState.StatusLine(false, 55) == "[OFF] 55% (k = 0.45)",
-              "and the same in the off state", TrayState.StatusLine(false, 55));
         Check(TrayState.StatusLine(true, 0) == "[ON] 0% (k = 1.00)" &&
               TrayState.StatusLine(true, 90) == "[ON] 90% (k = 0.10)",
               "k is 1 - strength/100 at both ends of the range", null);
         Check(!TrayState.StatusLine(true, 55).Contains("Neutral"),
               "and it does not name the mode either", null);
+
+        // Switched off there is no multiply, so there is no k to report and no
+        // percentage of an effect that is not happening. Same fault as the
+        // hover, same shape of assertion: over the range, because it was the
+        // format string that was wrong rather than any one value.
+        foreach (int v in new[] { 0, 1, 20, 55, 99, 100 })
+            Check(TrayState.StatusLine(false, v) == "[OFF]",
+                  "the notification says only that it is off", TrayState.StatusLine(false, v));
+        Check(TrayState.StatusLine(false, 55).IndexOf("k =", StringComparison.Ordinal) < 0,
+              "no coefficient is quoted for a multiply that is not being done", null);
     }
 
     // ------------------------------------------------------- retired modes

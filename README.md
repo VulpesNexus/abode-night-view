@@ -18,7 +18,7 @@ application, and nothing it does can reach a saved file or an export.
     tray → Enabled              on / off
     tray → Schedule             on and off by the clock, on a range you set
 
-One file, 378 KB, no installer, no admin rights, no runtime to download.
+One file, 387 KB, no installer, no admin rights, no runtime to download.
 Free software under the [GNU GPL v3 or later](#licence).
 
 **No keyboard shortcut is bound out of the box**, on purpose — a global hotkey
@@ -31,6 +31,7 @@ cost you on *your* keyboard. See [Shortcuts](#shortcuts).
 
 ## Contents
 
+- [What it does](#what-it-does)
 - [What gets dimmed](#what-gets-dimmed)
 - [Compatibility](#compatibility)
 - [The tray menu](#the-tray-menu)
@@ -55,11 +56,33 @@ cost you on *your* keyboard. See [Shortcuts](#shortcuts).
 
 ---
 
+## What it does
+
+<p align="center">
+  <img src="docs/dimming.png" alt="InDesign with the same document twice: on the left the page is white, on the right it is grey, with the toolbars, panels and rulers identical in both" width="900">
+</p>
+
+The same InDesign document, a keystroke apart. The page goes from 255 to 204;
+the toolbar, the panels, the rulers, the pasteboard and the rest of the desktop
+are pixel-identical. That is the whole product: the dimming is applied to the
+document viewport and to nothing else.
+
+204 is not an approximation. The Strength window in that screenshot reads
+`20% (k = 0.80)` and `255 (pure white) now displays as 204.`, and sampling the
+page in both images gives 254.8 and 204.2 — a measured ratio of 0.802 against a
+stated 0.800. The same measurement across all five products gives 0.802, 0.809
+and 0.803 for InDesign, Acrobat and InCopy; Illustrator reads lower only because
+the two captures are not scrolled to the same pixel.
+
+<p align="center">
+  <img src="docs/products.jpg" alt="Illustrator, Photoshop, Acrobat and InCopy, each shown switched off and switched on" width="820">
+</p>
+
 ## What it looks like
 
 <p align="center">
   <img src="docs/schedule.png"  alt="The Schedule window: two spin fields for the range, and a sentence saying what the schedule is doing about it" width="436">
-  <img src="docs/strength.png"  alt="The Strength window: a slider, with the percentage, the value white 255 lands on, and the multiplier k" width="366">
+  <img src="docs/strength.png"  alt="The Strength window: a slider, with the percentage and the multiplier k above it and the value white 255 lands on below" width="296">
 </p>
 <p align="center">
   <img src="docs/shortcuts.png" alt="The Shortcuts window: four rows to click and press a combination into, all unbound out of the box" width="455">
@@ -237,7 +260,7 @@ whitelist and capability detection: the failure is diagnosable without a rebuild
 ## The tray menu
 
 ```
-Abode Night View 1.3.0            <- click for About
+Abode Night View 1.4.0            <- click for About
 ──────────────────────────
 ✓ Enabled                          <- reads "Disabled", unticked, when off
 ✓ Schedule (20:00 – 07:00)  >      <- reads "(off)" when there is no schedule
@@ -331,27 +354,43 @@ tell a reader which was right. Both now enumerate.
 and `Disabled`, and the enabled state also carries a checkmark. One or the other
 alone was ambiguous — a lone "Enabled" reads equally as a label and as a button.
 
-The Strength window states the same number three ways — `20% dim | 255 (pure
-white) displays as 204 | k = 0.80` — because the percentage is the setting, 204
-is what you will actually see, and k is what the compositor multiplies by. The
-middle reading names its input as well as its output: `255 (pure white) displays
-as 204` says which way the arithmetic runs, where an earlier `white 255 becomes
-204` left that to be inferred.
+The Strength window puts the setting above the slider and its consequence below
+it: `20% (k = 0.80)` over the control, and `255 (pure white) now displays as
+204.` under it, in grey. The percentage is what you chose and k is what the
+compositor multiplies by — one fact in two units, so they stay on one line; the
+sentence underneath is the only part you can check by looking at the screen, so
+it sits next to the thing that changes it. All three used to be pipe-separated
+on a single line above the slider, which asked the eye to do the splitting.
 
 Hover text is exactly:
 
     Abode Night View: [ON] | 55%
-    Abode Night View: [OFF] | 55%
+    Abode Night View: [OFF]
 
-with the reason appended when it is switched on and nothing is being dimmed,
-because "on but doing nothing" is otherwise indistinguishable from broken:
+**Switched off, the state is the whole message.** The strength used to be there
+too, and it was a number describing an effect that was not being applied to
+anything: the hover read `55%` over a screen that was not dimmed at all. A
+stored setting is not a state, and the hover reports the state. The value is
+still one click away on the Strength item, where it is being read as a setting.
 
-| what is true                                     | hover says            |
-| ------------------------------------------------ | --------------------- |
+Switched on, a reason is appended when nothing is being dimmed *and there is
+something worth saying about it*, because "on but doing nothing" is otherwise
+indistinguishable from broken:
+
+| what is true                                      | hover says            |
+| ------------------------------------------------- | --------------------- |
 | nothing selected is running                       | `no target`           |
-| running, and showing no document                  | `no document open`    |
 | running, and this build cannot read its windows   | `unsupported version` |
 | running and readable, but minimised or off-screen | `nothing to dim`      |
+| running, and showing no document                  | *nothing*             |
+
+**An application with no document open is not reported.** It is the most
+ordinary thing an Adobe application can be doing — sitting on its own home
+screen, between jobs — and the hover said it about the desktop as a whole, where
+it distinguished nothing. The Targets menu still says it, per product, because
+there it tells one product apart from another. Silence is what "nothing is
+wrong" should look like; a fourth phrase would only have been the same noise
+under a shorter name.
 
 Those are the Targets menu's own words, and they are not a second opinion: the
 hover and the menu are two renderings of one survey of the desktop. They used to
@@ -360,7 +399,8 @@ counted overlays and called zero of them "no target" — so a Photoshop sitting 
 its welcome screen was `Photoshop 2026 (no document open)` in the menu and
 `no target` on hover, at the same moment, about the same program. An application
 that is running and selected **is** a target; whether it is currently offering
-anything to dim is a different question, and the hover now answers that one.
+anything to dim is a different question, and the hover now answers that one — or
+says nothing, which is also an answer.
 
 The hover is also rebuilt when the number of overlays or the number of frames
 changes, not only when you click something. Before, opening a document left the
@@ -369,15 +409,39 @@ tooltip reading `no target` until the next time you touched the menu.
 The notification is one line of the same state:
 
     [ON] 55% (k = 0.45)
+    [OFF]
+
+k is the multiplier the compositor applies, which is exactly why it leaves with
+the percentage. Switched off there is no multiply, so `k = 0.45` was naming a
+coefficient nothing was multiplying by — on the one notification whose whole job
+is to say that the dimming has stopped. The line under it already says which
+shortcut switches it back on.
+
+Both formats used to be built by substituting `ON` or `OFF` into a single
+composite string, which is why the strength was there in the off state: it was
+structurally impossible to leave out. The release build now fails if either of
+those format literals is still in the shipped binary.
 
 Neither names the filter any more. Neutral is the only mode this build renders,
 so the word was identical in every possible state — a third of a 63-character
 tooltip budget spent saying nothing. Dropping it is also what made room to write
 the product's name out in full instead of as "Abode NV".
 
-**The notification carries the artwork for the state it is announcing** — the
-plain icon when the dimming is off, the same character in sunglasses when it is
-on — so the state is readable before the sentence under it has been. Windows
+**The tray icon and the notification both carry the artwork for the state** —
+the plain icon when the dimming is off, the same character in sunglasses when it
+is on — so the state is readable before any sentence under it has been, and from
+the taskbar without hovering over anything at all.
+
+The two resolve through one function, because a notification arriving in a
+different face from the icon that raised it is the same class of contradiction
+as a tooltip disagreeing with its own menu. The pair carries 16, 20, 24, 32, 48,
+64 and 96 px: a balloon asks at `SM_CXICON` and a notification area at
+`SM_CXSMICON`, and an `.ico` whose smallest entry is 32 px is a tray icon the
+shell has to halve — which is how a two-pixel sunglasses bar stops being
+legible. The release build reads those sizes back out of the generated
+containers rather than trusting the list that generated them.
+
+Windows
 Forms only offers four stock pictures for a balloon, but the shell has taken an
 arbitrary one since Windows XP SP2 (`NIIF_USER` with `hBalloonIcon`), so the
 notification is raised through `Shell_NotifyIcon` directly. Doing that needs the
@@ -542,7 +606,7 @@ Product ids: `indesign`, `illustrator`, `incopy`, `photoshop`, `acrobat`.
 pasted into a bug report, and it comes back through whatever codepage the
 reporter's console happens to be set to:
 
-    Abode Night View 1.3.0 | x64 | .NET Framework 4.0.30319.42000 | Windows 10.0.26200
+    Abode Night View 1.4.0 | x64 | .NET Framework 4.0.30319.42000 | Windows 10.0.26200
 
 **Output from the diagnostic subcommands can look empty from PowerShell.** This
 is a GUI-subsystem binary, so double-clicking it never flashes a console — and
@@ -1036,7 +1100,7 @@ Development-tree tools:
 
 ```powershell
 .\Audit.exe               # 56 mechanical checks against windows it owns
-.\Audit.exe --selftest    # 264 checks: hotkeys, settings, migration, adapters,
+.\Audit.exe --selftest    # 310 checks: hotkeys, settings, migration, adapters,
                           #   the schedule, the notification, restart state,
                           #   dialog layout, text measurement, text spacing,
                           #   and the licence notice

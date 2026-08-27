@@ -14,7 +14,7 @@
 #  What runs here is everything that does NOT need a desk:
 #
 #    build.ps1              compiles all seven binaries from a clean checkout
-#    Audit.exe --selftest   264 assertions -- settings, migration, schedule,
+#    Audit.exe --selftest   310 assertions -- settings, migration, schedule,
 #                           hotkey parsing, tray and About wording
 #    build-release.ps1      builds dist\AbodeNightView.exe and runs it: version
 #                           resource, --diagnostics, --probe, portable settings,

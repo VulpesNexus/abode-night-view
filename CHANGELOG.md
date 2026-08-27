@@ -11,6 +11,81 @@ back out of the built binary's own version resource.
 
 ---
 
+## 1.4.0
+
+The tray icon carries the state; the two places that report the state stop
+reporting a strength when nothing is being dimmed; and the Strength window and
+the hover text each say one thing less.
+
+### Added
+
+- **The tray icon follows the state**: the plain artwork when the dimming is
+  off, the same character in sunglasses when it is on. The notification balloon
+  has carried that pair since 1.3.0; the icon that raised the notification did
+  not, so the toast and the tray could be showing two different faces for one
+  state. Both now resolve through the same function, and the two `.ico`
+  resources are named `state-off` / `state-on` for what they are rather than for
+  the one thing that used to read them.
+- The state artwork gained 16, 20 and 24 px entries. It carried nothing below
+  32, which is what a balloon asks for; a notification area asks for
+  SM_CXSMICON, and an `.ico` whose smallest entry is 32 px is a tray icon the
+  shell has to halve — and halving a two-pixel sunglasses bar is how the on
+  state stops being distinguishable at a glance. The release build reads the
+  sizes back out of the generated containers rather than trusting the list that
+  generated them.
+- **The README shows what the utility does**, rather than only what its windows
+  look like: the same InDesign page white and then grey with the toolbars,
+  panels and rulers pixel-identical either side, and the other four products
+  beside it. Sampling those captures gives 254.8 → 204.2, a ratio of 0.802
+  against the 0.800 the Strength window states.
+
+### Changed
+
+- **Switched off, the hover text is `Abode Night View: [OFF]` and nothing
+  else.** It used to carry the strength as well, which is a number describing an
+  effect that is not being applied to anything: the hover read `55%` over a
+  screen that was not dimmed at all. A stored setting is not a state. The value
+  is still one click away on the Strength item, where it is being read as a
+  setting rather than as a description of the screen.
+- **Switched off, the notification is `[OFF]` and nothing else** — no
+  percentage, and no `k`. k is the multiplier the compositor applies, which is
+  exactly why it leaves with the percentage: switched off there is no multiply,
+  so `k = 0.45` was naming a coefficient nothing was multiplying by, on the one
+  notification whose whole job is to say the dimming has stopped.
+- Both of those came from one composite format string with `ON`/`OFF`
+  substituted into it, so the strength was structurally impossible to omit. The
+  release build now fails if either format literal is still in the artifact.
+- **The hover no longer reports an application with no document open.** It is
+  the most ordinary thing an Adobe application can be doing — sitting on its own
+  home screen, between jobs — and where the Targets menu says it about one named
+  product among several, the hover was saying it about the desktop as a whole,
+  where it distinguished nothing. `no target`, `unsupported version` and
+  `nothing to dim` remain; the fourth case is now silence, which is what
+  "nothing is wrong" should look like. A running product this build cannot read
+  also now outranks it, where it used to lose to it.
+- **The Strength window puts the setting above the slider and its consequence
+  below it**: `20% (k = 0.80)` over the control, `255 (pure white) now displays
+  as 204.` under it, in grey. All three readings used to sit on one line above
+  the slider, pipe-separated, which asks the eye to do the splitting; and the
+  percentage and k are one fact in two units, so they belong together while the
+  sentence about a pixel belongs next to the thing that changes it. "20% dim"
+  lost the word "dim" — the sentence underneath already says which way the
+  number runs, on a window titled Strength with one control in it. The window is
+  a third narrower as a result, because its width was set by that long line.
+- Both Strength strings moved into `TrayState`, which is where every other line
+  the user reads already lives. They were the last two still being formatted at
+  the point of display, and therefore the last two no test could read.
+- `--diagnostics` calls its icon rows `window icon` and `state artwork`, and
+  adds `tray icon shows`. The row labelled `tray icon` reported the source the
+  tray no longer uses.
+- The release script deletes the generated `.ico` files and lets `build.ps1`
+  regenerate them, instead of regenerating them itself with its own copy of the
+  size list. The two lists had already been written down twice; the release
+  script's copy would have silently overridden the build's and shipped 1.4.0
+  without the sizes the tray icon needs.
+
+---
+
 ## 1.3.0
 
 First public release.

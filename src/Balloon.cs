@@ -21,6 +21,14 @@
 //      the same character wearing sunglasses -- when it is on. That mapping is
 //      the whole point: the icon a user sees is the state they are in.
 //
+//      The tray icon itself now follows the same mapping, so the two resources
+//      below are no longer a balloon's private artwork -- they are the state,
+//      drawn -- and they are named state-off / state-on for it. The tray reads
+//      them through the same Art(state, size) that the balloon does, because a
+//      notification wearing one face while the icon that raised it wears
+//      another is the same class of contradiction as a tooltip disagreeing with
+//      its own menu.
+//
 //  Why this is not three lines of WinForms
 //      NotifyIcon.ShowBalloonTip takes a ToolTipIcon, which is an enum of four
 //      stock pictures. The shell itself has supported an arbitrary icon since
@@ -52,8 +60,16 @@
 //      shell something to shrink costs nothing; handing it something to enlarge
 //      shows.
 //
-//      The .ico resources carry 32, 48, 64 and 96, and the closest is selected
-//      at load time rather than resampled from one bitmap. They are PNG-
+//      The notification area asks for the opposite end of the same ladder --
+//      SM_CXSMICON, 16 px at 100% and 32 px at 200% -- so the resources carry
+//      16, 20, 24, 32, 48, 64 and 96: what a tray asks for at the four scalings
+//      Windows offers, and what a toast asks for at the same four.
+//
+//      The closest entry is selected at load time rather than resampled from
+//      one bitmap, which is the reason the small sizes had to be added rather
+//      than left to the shell: an .ico whose smallest entry is 32 px is a 32 px
+//      icon halved by the tray, and halving artwork with a 2 px sunglasses bar
+//      in it is how the on state stops being legible. They are PNG-
 //      compressed inside the container, which Windows has understood since
 //      Vista -- CreateIconFromResourceEx, which is what produces the HICON here,
 //      and DrawIconEx, which is what the shell draws it with. (System.Drawing's
@@ -63,7 +79,9 @@
 // ============================================================================
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -116,42 +134,66 @@ internal static class Balloon
 
     // ------------------------------------------------------------- artwork
 
-    public const string OffResource = "balloon-off.ico";
-    public const string OnResource = "balloon-on.ico";
+    public const string OffResource = "state-off.ico";
+    public const string OnResource = "state-on.ico";
 
-    private static Icon _on, _off;
-    private static bool _triedOn, _triedOff;
+    /// <summary>
+    /// Keyed by state AND size, because the two things that read these now want
+    /// very different ones: a toast around 48-96 px, a tray icon 16-32. One
+    /// cached Icon per state would have handed whichever asked second the size
+    /// the first one wanted.
+    /// </summary>
+    private static readonly Dictionary<string, Icon> _art = new Dictionary<string, Icon>();
 
-    /// <summary>How the two icons last resolved, for --diagnostics.</summary>
+    /// <summary>How the icons last resolved, for --diagnostics.</summary>
     public static string Artwork = "(not loaded)";
 
     /// <summary>How the last balloon was actually raised, for --diagnostics.</summary>
     public static string Mechanism = "(nothing shown yet)";
 
     /// <summary>
-    /// The picture for a given state: the "cool" variant when the dimming is
-    /// on, the plain one when it is off. Cached, and deliberately never
-    /// disposed: the shell reads the HICON while the balloon is on screen, and
-    /// the icons are two of them for the life of the process.
+    /// The picture for a given state at the size a balloon wants it: the "cool"
+    /// variant when the dimming is on, the plain one when it is off.
+    ///
+    /// Twice SM_CXICON, capped at the largest size in the resource -- a Windows
+    /// 10/11 toast draws this bigger than the metric it asks for.
     /// </summary>
     public static Icon Art(bool enabled)
     {
-        if (enabled)
-        {
-            if (!_triedOn) { _triedOn = true; _on = Load(OnResource, "on"); }
-            return _on;
-        }
-        if (!_triedOff) { _triedOff = true; _off = Load(OffResource, "off"); }
-        return _off;
+        return Art(enabled, Math.Min(96, SystemInformation.IconSize.Width * 2));
     }
 
-    private static Icon Load(string resource, string which)
+    /// <summary>
+    /// The same picture at a size the caller names, for the notification area,
+    /// which asks for SM_CXSMICON rather than SM_CXICON.
+    ///
+    /// Cached, and deliberately never disposed. The shell reads the HICON while
+    /// the balloon is on screen and for as long as the tray icon is in the
+    /// notification area, which for the tray is the life of the process; and
+    /// there are at most a handful of them, one per (state, size) actually
+    /// asked for.
+    /// </summary>
+    public static Icon Art(bool enabled, int size)
+    {
+        if (size < 1) size = 16;
+        string key = (enabled ? "on:" : "off:") + size.ToString(CultureInfo.InvariantCulture);
+
+        Icon cached;
+        if (_art.TryGetValue(key, out cached)) return cached;
+
+        // Stored even when it is null: a resource that is not in this build will
+        // not be in it a second later either, and Note() would otherwise append
+        // the same failure to --diagnostics on every repaint.
+        Icon loaded = Load(enabled ? OnResource : OffResource,
+                           (enabled ? "on" : "off") + " @" + size, size);
+        _art[key] = loaded;
+        return loaded;
+    }
+
+    private static Icon Load(string resource, string which, int want)
     {
         try
         {
-            // Twice SM_CXICON, capped at the largest size in the resource: a
-            // Windows 10/11 toast draws this bigger than the metric it asks for.
-            int want = Math.Min(96, SystemInformation.IconSize.Width * 2);
             using (Stream s = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource))
             {
                 if (s == null)

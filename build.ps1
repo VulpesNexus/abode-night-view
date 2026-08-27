@@ -51,26 +51,28 @@ if (-not (Test-Path -LiteralPath $ico)) {
     & (Join-Path $root 'tools\make-icon.ps1') -Source (Join-Path $root 'assets\source-icon.png') -Out $ico
 }
 
-# The notification balloon carries the state it is announcing: the plain artwork
-# when the dimming is off, the "cool" variant when it is on. The shell will only
-# take a balloon icon as an HICON, so both are built as .ico files and embedded
-# as managed resources, which src\Balloon.cs loads by these exact names.
+# The tray icon and the notification balloon both carry the state: the plain
+# artwork when the dimming is off, the "cool" variant when it is on. The shell
+# will only take either as an HICON, so both variants are built as .ico files and
+# embedded as managed resources, which src\Balloon.cs loads by these exact names.
 #
-# Only the sizes a balloon can actually ask for. NIIF_LARGE_ICON is SM_CXICON,
-# which is 32 px at 100% scaling and 96 px at 300%; nothing ever requests 16 or
-# 256, and a 256 px entry alone would be a third of the whole binary.
-$balloonSizes = 32, 48, 64, 96
-$balloons = @(
-    @{ Src = 'assets\source-icon.png';      Out = 'assets\balloon-off.ico'; Id = 'balloon-off.ico' },
-    @{ Src = 'assets\source-icon-cool.png'; Out = 'assets\balloon-on.ico';  Id = 'balloon-on.ico'  }
+# The sizes are the two ends of one ladder. A balloon asks at NIIF_LARGE_ICON,
+# nominally SM_CXICON: 32 px at 100% scaling and 96 px at 300%. The notification
+# area asks at SM_CXSMICON: 16 px at 100%, 20 at 125%, 24 at 150%, 32 at 200%.
+# 128 and 256 are still left out - nothing here is ever drawn that large, and a
+# 256 px entry alone would be a third of the whole binary.
+$stateSizes = 16, 20, 24, 32, 48, 64, 96
+$stateArt = @(
+    @{ Src = 'assets\source-icon.png';      Out = 'assets\state-off.ico'; Id = 'state-off.ico' },
+    @{ Src = 'assets\source-icon-cool.png'; Out = 'assets\state-on.ico';  Id = 'state-on.ico'  }
 )
 $resources = @()
-foreach ($b in $balloons) {
+foreach ($b in $stateArt) {
     $bico = Join-Path $root $b.Out
     if (-not (Test-Path -LiteralPath $bico)) {
         Write-Host "Generating $bico" -ForegroundColor DarkGray
         & (Join-Path $root 'tools\make-icon.ps1') `
-            -Source (Join-Path $root $b.Src) -Out $bico -Sizes $balloonSizes
+            -Source (Join-Path $root $b.Src) -Out $bico -Sizes $stateSizes
     }
     $resources += "-resource:$bico,$($b.Id)"
 }

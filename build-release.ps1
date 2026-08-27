@@ -71,24 +71,22 @@ if (Test-Path -LiteralPath $dist) {
     }
 }
 
-# 2. Regenerate the icon from the source artwork in the repository, so a clean
-#    checkout produces a byte-identical resource without anything external.
-$ico = Join-Path $root 'assets\AbodeNightView.ico'
-if (Test-Path -LiteralPath $ico) { Remove-Item -LiteralPath $ico -Force }
-& (Join-Path $root 'tools\make-icon.ps1') `
-    -Source (Join-Path $root 'assets\source-icon.png') -Out $ico
-
-# Same for the two balloon icons, which are embedded as managed resources rather
-# than as the Win32 icon group. build.ps1 generates them if they are missing;
-# here they are regenerated unconditionally, so the shipped binary can never
-# carry artwork left over from an earlier edit of the source PNG.
-foreach ($b in @(
-    @{ Src = 'assets\source-icon.png';      Out = 'assets\balloon-off.ico' },
-    @{ Src = 'assets\source-icon-cool.png'; Out = 'assets\balloon-on.ico'  })) {
-    $bico = Join-Path $root $b.Out
-    if (Test-Path -LiteralPath $bico) { Remove-Item -LiteralPath $bico -Force }
-    & (Join-Path $root 'tools\make-icon.ps1') `
-        -Source (Join-Path $root $b.Src) -Out $bico -Sizes 32,48,64,96
+# 2. Delete every generated icon, so the shipped binary cannot carry artwork
+#    left over from an earlier edit of a source PNG. build.ps1 regenerates each
+#    one it finds missing, from the sources in the repository, which is what
+#    makes a clean checkout produce a byte-identical resource.
+#
+#    Deleted here and regenerated there, rather than regenerated here, so the
+#    size ladder for each icon is written down in exactly one place. This block
+#    used to repeat "-Sizes 32,48,64,96" next to build.ps1's own copy of the
+#    same list, which is a release script quietly overriding the build it is
+#    about to run -- and it would have shipped 1.4.0 without the small entries
+#    the tray icon needs.
+foreach ($generated in 'assets\AbodeNightView.ico',
+                       'assets\state-off.ico',
+                       'assets\state-on.ico') {
+    $g = Join-Path $root $generated
+    if (Test-Path -LiteralPath $g) { Remove-Item -LiteralPath $g -Force }
 }
 
 # 3. Compile.
@@ -221,13 +219,43 @@ Write-Host "  no hand-padded separator survives in a label" -ForegroundColor Dar
 # against the artifact. 'white 255 becomes' is the superseded wording; it is
 # checked as plain ASCII because the string it came from carried en dashes and
 # the point here is to catch the phrase, not the punctuation around it.
-if ($text.Contains('white 255 becomes')) {
-    throw "the superseded strength readout is still in the binary"
+foreach ($gone in 'white 255 becomes',
+                  '% dim | 255 (pure white) displays as ',
+                  '{0}% dim') {
+    if ($text.Contains($gone)) { throw "a superseded strength readout is still in the binary: '$gone'" }
 }
-foreach ($needed in '% dim | 255 (pure white) displays as ', 'nothing to dim') {
+foreach ($needed in '{0}% (k = {1:0.00})', '255 (pure white) now displays as {0}.',
+                    'nothing to dim') {
     if (-not $text.Contains($needed)) { throw "expected string missing from the binary: '$needed'" }
 }
 Write-Host "  the strength readout and the hover reasons are the current ones" -ForegroundColor DarkGray
+
+# "No document open" is the Targets menu's per-product note. It stopped being
+# one of the hover's reasons, but the hover built that suffix at run time from
+# " | " + the reason, so there is no literal here to find the absence of: the
+# assertion that the hover has stopped saying it lives in Audit.exe --selftest,
+# which can call IdleReason and read null back. What the artifact CAN say is
+# that the menu still has the words at all.
+if (-not $text.Contains('no document open')) {
+    throw "the Targets menu's per-product note is missing from the binary"
+}
+Write-Host "  the Targets menu can still name an empty document window" -ForegroundColor DarkGray
+
+# The off state says only that it is off. Both formats used to be built by
+# substituting "ON"/"OFF" into one composite format string, which is what put a
+# strength on a hover for a screen that was not being dimmed. Those two literals
+# are the evidence the substitution is gone: while either survives in the
+# artifact, something is still assembling a percentage around the state word.
+foreach ($gone in 'Abode Night View: [{0}] | {1}%', '[{0}] {1}% (k = {2:0.00})') {
+    if ($text.Contains($gone)) {
+        throw ("the state word is still being substituted into a format that carries " +
+               "a strength, so the off state can still show one: '$gone'")
+    }
+}
+foreach ($needed in 'Abode Night View: [OFF]', 'Abode Night View: [ON] | {0}%', '[ON] {0}% (k = {1:0.00})') {
+    if (-not $text.Contains($needed)) { throw "expected string missing from the binary: '$needed'" }
+}
+Write-Host "  switched off, the hover and the notification carry no strength" -ForegroundColor DarkGray
 
 # 4c. Licence and provenance.
 #
@@ -270,16 +298,39 @@ if ($offenders) {
 }
 Write-Host "  no icon is drawn through Icon.ToBitmap()" -ForegroundColor DarkGray
 
-# The notification artwork. A -resource: flag quietly dropped from the build
-# produces a binary that works and shows the wrong picture, which is exactly the
-# class of fault a smoke test exists for. Managed resource NAMES are stored in
-# the metadata as UTF-8, so they are searched in the byte stream as ASCII --
-# where the UTF-16 string literals in the code cannot be mistaken for them.
+# The state artwork, which is now what the tray icon is made of as well as the
+# balloon. A -resource: flag quietly dropped from the build produces a binary
+# that works and shows the wrong picture, which is exactly the class of fault a
+# smoke test exists for. Managed resource NAMES are stored in the metadata as
+# UTF-8, so they are searched in the byte stream as ASCII -- where the UTF-16
+# string literals in the code cannot be mistaken for them.
 $ascii = [Text.Encoding]::ASCII.GetString($bytes)
-foreach ($res in 'balloon-off.ico', 'balloon-on.ico') {
-    if (-not $ascii.Contains($res)) { throw "notification artwork missing from the binary: '$res'" }
+foreach ($res in 'state-off.ico', 'state-on.ico') {
+    if (-not $ascii.Contains($res)) { throw "state artwork missing from the binary: '$res'" }
 }
-Write-Host "  both notification icons are embedded" -ForegroundColor DarkGray
+Write-Host "  both state icons are embedded" -ForegroundColor DarkGray
+
+# ...and that they carry an entry the notification area can use. Embedding the
+# resource is not enough: the sizes inside it are chosen by build.ps1, and an
+# .ico whose smallest entry is 32 px is a tray icon the shell has to halve.
+# Read back out of the generated containers rather than trusted from the list
+# that generated them.
+foreach ($container in 'assets\state-off.ico', 'assets\state-on.ico') {
+    $raw = [IO.File]::ReadAllBytes((Join-Path $root $container))
+    $count = [BitConverter]::ToUInt16($raw, 4)
+    $widths = @()
+    for ($i = 0; $i -lt $count; $i++) {
+        $w = $raw[6 + $i * 16]
+        $widths += $(if ($w -eq 0) { 256 } else { [int]$w })
+    }
+    foreach ($needed in 16, 20, 24, 32) {
+        if ($widths -notcontains $needed) {
+            throw ("$container has no ${needed}px entry, so the notification area " +
+                   "would be shown a scaled icon (it carries " + ($widths -join ',') + ")")
+        }
+    }
+}
+Write-Host "  both carry 16/20/24/32 px for the notification area" -ForegroundColor DarkGray
 
 # 5. Describe exactly what was produced.
 $item = Get-Item -LiteralPath $exe
