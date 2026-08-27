@@ -2,13 +2,12 @@
 
 [![build](https://github.com/VulpesNexus/abode-night-view/actions/workflows/build.yml/badge.svg)](https://github.com/VulpesNexus/abode-night-view/actions/workflows/build.yml)
 
-A display-only dimmer for Adobe document viewports.
+A display-only dimmer for Adobe document viewports for those late-night crunching sessions.
+*Please remember to turn it off when doing print preparation or color proofing.*
 
-At 2am a page of white paper at full brightness is a lamp pointed at your face.
-Abode Night View parks a black, click-through, layered window over each Adobe
-document canvas and lets the Windows compositor multiply it down. The page goes
-from 255 to about 115; the panels, the menus, the toolbar and everything else on
-your desktop are untouched.
+**Abode Night View** parks a black, click-through, layered window over each Adobe
+document canvas and lets the Windows compositor multiply it down. The panels,
+the menus, the toolbar and everything else on your desktop are untouched.
 
 **It never modifies a document.** It reads window geometry and paints its own
 windows. It does not open, script, message, hook or inject into any Adobe
@@ -18,7 +17,7 @@ application, and nothing it does can reach a saved file or an export.
     tray → Enabled              on / off
     tray → Schedule             on and off by the clock, on a range you set
 
-One file, 387 KB, no installer, no admin rights, no runtime to download.
+One file, 387 KB — no installer, no admin rights, no runtime to download.
 Free software under the [GNU GPL v3 or later](#licence).
 
 **No keyboard shortcut is bound out of the box**, on purpose — a global hotkey
