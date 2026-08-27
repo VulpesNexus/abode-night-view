@@ -11,6 +11,26 @@ back out of the built binary's own version resource.
 
 ---
 
+## Unreleased
+
+Nothing in the program changed. This is the build, on the first day it ever ran
+anywhere but the machine it was written on.
+
+### Fixed
+
+- **The release build's portable-settings check failed on every GitHub-hosted
+  Windows runner**, whose `%TEMP%` is an 8.3 short path: `C:\Users\RUNNER~1\`
+  `AppData\Local\Temp`. The check built the path it expected out of `%TEMP%`
+  and compared it as a string against the path the program reports — and
+  Windows hands a process the *long* form of its own module path. Two spellings
+  of one directory, and the program was right in both of them. The directory is
+  now established by identity rather than by spelling: a marker file is written
+  beside the executable and looked for in the directory `--diagnostics` names.
+  The failure quotes both paths now, too, because the first machine it ever
+  failed on is one nobody can log into.
+
+---
+
 ## 1.4.0
 
 The tray icon carries the state; the two places that report the state stop

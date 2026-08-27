@@ -133,9 +133,32 @@ if (-not $SkipTests) {
         # its settings BESIDE itself, not in AppData. The diagnostic subcommands
         # do not write the file (they are read-only on purpose), so what is
         # checked is the decision, which --diagnostics reports.
-        $want = Join-Path $tmp 'AbodeNightView.ini'
-        if ($diag -notmatch [regex]::Escape($want)) {
-            throw "settings path is not beside the executable; --diagnostics says otherwise"
+        #
+        # The directory is compared by identity, not by spelling. %TEMP% can be
+        # an 8.3 short path -- on GitHub's hosted Windows runners it is
+        # C:\Users\RUNNER~1\AppData\Local\Temp -- while Windows hands a process
+        # the long form of its own module path. String-comparing the two is
+        # comparing two spellings of one directory, and fails on a machine that
+        # is behaving perfectly. A marker file settles it without knowing
+        # anything about how either side chose to spell the path.
+        $said = ($diag -split "`n" | Where-Object { $_ -match 'settings file' } |
+                 Select-Object -First 1)
+        if (-not $said) { throw "--diagnostics has no 'settings file' row" }
+        $reported = ($said -replace '^\s*settings file\s+', '').Trim()
+        if ([IO.Path]::GetFileName($reported) -ne 'AbodeNightView.ini') {
+            throw "the settings file is not named AbodeNightView.ini; --diagnostics said '$reported'"
+        }
+
+        $marker = 'smoke-' + [Guid]::NewGuid().ToString('N') + '.marker'
+        New-Item -ItemType File -Path (Join-Path $tmp $marker) | Out-Null
+        $reportedDir = Split-Path -Parent $reported
+        if (-not $reportedDir -or -not (Test-Path -LiteralPath (Join-Path $reportedDir $marker))) {
+            # Quote both sides: an assertion that only says "it did not match"
+            # cannot be diagnosed from a build log on a machine nobody can
+            # reach, which is exactly where this one first failed.
+            throw ("settings do not resolve beside the executable" +
+                   "`n    the executable is in  $tmp" +
+                   "`n    --diagnostics says    $reported")
         }
         if ($diag -notmatch 'settings mode\s+portable') {
             throw "settings did not resolve as portable from a writable folder"
