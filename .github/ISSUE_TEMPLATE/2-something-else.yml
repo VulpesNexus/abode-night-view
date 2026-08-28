@@ -1,0 +1,67 @@
+name: Something else is wrong
+description: It dims the wrong region, at the wrong moment, flickers, or misbehaves in some other way.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One command answers most of what would otherwise be a round of questions:
+
+        ```
+        AbodeNightView.exe --diagnostics
+        ```
+
+        It writes `AbodeNightView-diagnostics.txt` next to the executable: the Windows
+        build, the DPI awareness actually applied, every monitor with its rectangle and
+        scaling, every recognised Adobe application with its version and resolved
+        viewports, the live overlay slots, and the settings as loaded. No document
+        names, no file contents, no window titles other than the application frames.
+
+        If the thing you are reporting is a flash or a flicker, add
+        `AbodeNightView.exe --watch=25`, work normally for those 25 seconds, and attach
+        that too - it timestamps every transition, so a fault that lasts a frame still
+        leaves a line.
+
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens
+      description: What you did, what you saw, and what you expected to see instead.
+      placeholder: |
+        Dragging an InDesign window to the second monitor leaves the overlay at the old
+        size until I click on the canvas.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      multiple: true
+      options:
+        - InDesign
+        - Illustrator
+        - InCopy
+        - Photoshop
+        - Acrobat
+        - The tray menu, the schedule, or the shortcut editor
+        - Not specific to one product
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Abode Night View version
+      description: tray -> About, or the Details tab of the executable's properties.
+      placeholder: "1.4.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: --diagnostics
+      description: Attach AbodeNightView-diagnostics.txt, or paste it here.
+    validations:
+      required: true

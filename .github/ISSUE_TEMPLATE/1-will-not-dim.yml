@@ -1,0 +1,77 @@
+name: A product will not dim
+description: An Adobe application is open with a document, and no overlay appears over its canvas.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `--probe` was written for exactly this. Per product it prints the window
+        structure it looks for, what it found instead, and which step failed - which
+        is usually the whole answer, including for an Adobe version newer than
+        anything that has been tested.
+
+        Run both of these in the folder the executable is in, and attach the two text
+        files they write next to it:
+
+        ```
+        AbodeNightView.exe --probe
+        AbodeNightView.exe --diagnostics
+        ```
+
+        Neither one records document names, file contents, or any window title other
+        than the application frames.
+
+  - type: checkboxes
+    id: the-two-usual-answers
+    attributes:
+      label: The two things this usually turns out to be
+      options:
+        - label: A document is open in the application. An application with no document open gets no overlay, by design - there is no viewport to dim.
+          required: true
+        - label: The product is ticked in tray -> Targets. Photoshop ships switched off on purpose; the reason is in Design notes.
+          required: true
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: Which product will not dim
+      multiple: true
+      options:
+        - InDesign
+        - Illustrator
+        - InCopy
+        - Photoshop
+        - Acrobat
+    validations:
+      required: true
+
+  - type: input
+    id: adobe-version
+    attributes:
+      label: Adobe version
+      description: Help > About, or the year in the title bar. The exact build number if you have it.
+      placeholder: Adobe InDesign 2027, 22.0.1
+    validations:
+      required: true
+
+  - type: textarea
+    id: probe
+    attributes:
+      label: --probe
+      description: Attach AbodeNightView-probe.txt, or paste the block for the product that failed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: --diagnostics
+      description: Attach AbodeNightView-diagnostics.txt.
+    validations:
+      required: true
+
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else
+      description: Optional. A screenshot, an unusual window layout, or what else was open at the time.

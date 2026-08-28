@@ -1,0 +1,17 @@
+# Blank issues stay enabled on purpose: a question that none of these three
+# documents answers is still worth asking, and a form should not be a gate in
+# front of it. The two forms exist for the two reports the README asks for by
+# name, because both of them are answered by a file the reporter can generate
+# in one command and nobody thinks to attach unprompted.
+blank_issues_enabled: true
+
+contact_links:
+  - name: How do I use it
+    url: https://github.com/VulpesNexus/abode-night-view/blob/main/docs/usage.md
+    about: The tray menu, the schedule, shortcuts, settings, and the command line.
+  - name: Is my setup supported
+    url: https://github.com/VulpesNexus/abode-night-view/blob/main/docs/compatibility.md
+    about: What was tested, on what, and how sure - with the known limitations.
+  - name: Why does it work like that
+    url: https://github.com/VulpesNexus/abode-night-view/blob/main/docs/design-notes.md
+    about: The one filter, the modes that were removed, and the wording in the tray.
