@@ -151,8 +151,9 @@ and resynchronizing with a time server: each of those is a boundary that has
 silently gone past. `SystemEvents.TimeChanged` re-evaluates rather than waiting
 for the next one.
 
-The Schedule item reads `Schedule  (20:00 – 07:00)` or `Schedule  (off)` before
-the pointer ever reaches the drop-down, so the submenu carries the two choices
+**What it is about to do is on the item, not under it.** The Schedule item
+reads `Schedule  (20:00 – 07:00)` or `Schedule  (off)` before the pointer ever
+reaches the drop-down, so the submenu carries the two choices
 and the range editor and nothing else. The editor's own sentence is the longer
 form:
 
@@ -279,7 +280,8 @@ hotkey.quit=
 ```
 
 An empty `hotkey.` value means nothing is bound, which is what ships. See
-[Shortcuts](#shortcuts).
+[Shortcuts](#shortcuts) for why, and for what an upgrade from 1.2 does to the
+four values that used to be there.
 
 Everything you change through the tray is written here immediately and is the
 default next time: enabled state, strength, mode, the schedule, per-product

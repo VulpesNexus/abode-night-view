@@ -179,9 +179,8 @@ The research code is kept, out of the product tree, in
 
 ## The words in the tray
 
-The tray menu, the hover text, and the notification are three renderings of one
-survey of the desktop. Most of the work in them is making sure they cannot
-disagree.
+The tray menu, the hover text, and the notification all describe one state. Most
+of the work in them is making sure they cannot disagree.
 
 **Targets is alphabetical and drops the word "Adobe".** Every product this
 utility knows about is an Adobe one, so the word sorted nothing and told the
@@ -269,9 +268,10 @@ because there it tells one product apart from another. Silence is what "nothing
 is wrong" should look like; a fourth phrase would only have been the same noise
 under a shorter name.
 
-Those are the Targets menu's own words, and they are not a second opinion. They
-used to be two ideas of what a target *is* — the menu asked the desktop, the
-hover counted overlays and called zero of them "no target" — so a Photoshop
+Those are the Targets menu's own words, and they are not a second opinion: the
+hover and the menu are two renderings of one survey of the desktop. They used to
+be two ideas of what a target *is* — the menu asked the desktop, the hover
+counted overlays and called zero of them "no target" — so a Photoshop
 sitting on its welcome screen was `Photoshop 2026 (no document open)` in the
 menu and `no target` on hover, at the same moment, about the same program. An
 application that is running and selected **is** a target; whether it is currently
