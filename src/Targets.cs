@@ -192,15 +192,15 @@ internal abstract class AdobeTarget
     /// The policy is SEMANTIC, not a confidence rating: products whose viewport is
     /// predominantly white paper or artboard default on; products where dimming
     /// changes the artwork you are judging default off. Confidence is reported
-    /// separately, in --probe and the compatibility table in the README.
+    /// separately, in --probe and the compatibility table in docs/compatibility.md.
     /// </summary>
     public virtual bool DefaultEnabled { get { return true; } }
 
     /// <summary>
-    /// Shown by --probe and documented in the README. Deliberately NOT in the tray
-    /// menu: it is a sentence of rationale, and a menu item is a place for a name
-    /// and a state, not for an argument. The default it explains still holds either
-    /// way -- the note was never what made Photoshop start switched off.
+    /// Shown by --probe and documented in docs/design-notes.md. Deliberately NOT in
+    /// the tray menu: it is a sentence of rationale, and a menu item is a place for
+    /// a name and a state, not for an argument. The default it explains still holds
+    /// either way -- the note was never what made Photoshop start switched off.
     /// May be null.
     /// </summary>
     public virtual string SemanticNote { get { return null; } }

@@ -409,7 +409,7 @@ internal sealed class AbodeNvContext : ApplicationContext
     /// by k = 1-a: hue, saturation and relative contrast are all preserved and
     /// only the level moves. Any other source color turns the same expression
     /// into "multiply by k, then ADD light", which is what the removed Warm mode
-    /// did -- see README "Rejected rendering approaches" for the measurements.
+    /// did -- see docs/design-notes.md "Why Warm was removed" for the measurements.
     /// </summary>
     private static Color TintColor() { return Color.Black; }
 

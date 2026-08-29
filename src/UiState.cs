@@ -45,7 +45,8 @@ using System.Windows.Forms;
 /// black one.
 ///
 /// Greyscale and Shader were investigated, measured and removed in 1.2.0;
-/// see README "Rejected rendering approaches" for the measurements.
+/// see docs/design-notes.md "Rendering: why there is one filter" for the
+/// measurements.
 /// </summary>
 internal static class Modes
 {

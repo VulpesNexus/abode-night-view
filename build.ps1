@@ -79,7 +79,7 @@ foreach ($b in $stateArt) {
 
 # -platform:x64 is NOT optional for Prototype C: the Magnification API is
 # documented as unsupported under WOW64. AbodeNightView.exe is built x64 too -
-# see README "Architecture" for why there is no x86 build.
+# see docs/internals.md "Architecture" for why there is no x86 build.
 #
 # Prototype C lives in experiments\, not src\. It is the measurement rig that
 # settled whether a Greyscale mode could be built without capturing the screen.
